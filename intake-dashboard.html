@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Intake Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#07080f; --surface:#0e1020; --border:rgba(255,255,255,0.07);
+  --border-hi:rgba(255,255,255,0.14); --text:#e8eaf6; --muted:rgba(232,234,246,0.38);
+  --dim:rgba(232,234,246,0.18); --green:#39e8a2; --green-bg:rgba(57,232,162,0.1);
+  --purple:#b09dff; --purple-bg:rgba(176,157,255,0.1);
+  --amber:#ffc86b; --amber-bg:rgba(255,200,107,0.1);
+  --blue:#6eb3ff; --blue-bg:rgba(110,179,255,0.1);
+  --font-head:'Syne',sans-serif; --font-mono:'DM Mono',monospace;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font-mono);font-size:15px;line-height:1.5;overflow:hidden;}
+#app{display:grid;grid-template-rows:auto auto 1fr auto;height:100vh;padding:1.5rem 2rem 1rem;gap:1.25rem;}
+header{display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--border);padding-bottom:1rem;}
+.logo{font-family:var(--font-head);font-size:26px;font-weight:800;letter-spacing:-0.02em;color:var(--text);}
+.logo span{color:var(--green);}
+.header-right{display:flex;align-items:center;gap:1.5rem;}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:99px;font-size:12px;font-weight:500;letter-spacing:0.05em;text-transform:uppercase;}
+.badge-live{background:var(--green-bg);color:var(--green);border:0.5px solid rgba(57,232,162,0.25);}
+.badge-summary{background:var(--purple-bg);color:var(--purple);border:0.5px solid rgba(176,157,255,0.25);}
+.badge-loading{background:rgba(255,255,255,0.06);color:var(--muted);border:0.5px solid var(--border);}
+.pulse{width:7px;height:7px;border-radius:50%;background:currentColor;animation:pulse 1.8s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}
+#clock{font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--muted);letter-spacing:0.04em;min-width:110px;text-align:right;}
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.stat{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:.9rem 1.1rem;position:relative;overflow:hidden;}
+.stat::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent,var(--green));border-radius:3px 0 0 3px;}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:5px;}
+.stat-value{font-family:var(--font-head);font-size:30px;font-weight:700;color:var(--text);line-height:1;}
+.stat-sub{font-size:11px;color:var(--dim);margin-top:4px;}
+.table-wrap{background:var(--surface);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+.table-scroll{overflow-y:auto;flex:1;}
+table{width:100%;border-collapse:collapse;table-layout:fixed;}
+thead th{position:sticky;top:0;background:var(--surface);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);padding:10px 16px;text-align:left;border-bottom:0.5px solid var(--border);z-index:2;}
+tbody tr{border-bottom:0.5px solid var(--border);transition:background .15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,0.03);}
+tbody td{padding:11px 16px;font-size:13px;color:var(--text);vertical-align:middle;}
+.col-rank{width:56px;}.col-name{width:auto;}.col-pill{width:100px;text-align:center;}.col-time{width:90px;}.col-camp{width:130px;}
+.rank-num{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--dim);}
+.rank-1{color:#ffd700;}.rank-2{color:#c0c0c0;}.rank-3{color:#cd7f32;}
+.avatar{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;font-size:10px;font-weight:500;margin-right:9px;vertical-align:middle;flex-shrink:0;}
+.agent-name-cell{font-family:var(--font-head);font-size:14px;font-weight:600;vertical-align:middle;}
+.pill{display:inline-block;padding:3px 12px;border-radius:99px;font-size:12px;font-weight:500;}
+.pill-green{background:var(--green-bg);color:var(--green);}
+.pill-purple{background:var(--purple-bg);color:var(--purple);}
+.pill-amber{background:var(--amber-bg);color:var(--amber);}
+.pill-blue{background:var(--blue-bg);color:var(--blue);}
+.muted-text{color:var(--muted);font-size:12px;}
+.empty-state{text-align:center;padding:4rem 1rem;color:var(--dim);font-size:13px;}
+.footer{display:flex;justify-content:space-between;align-items:center;border-top:0.5px solid var(--border);padding-top:.5rem;}
+.footer-note{font-size:11px;color:var(--dim);}
+#last-updated{font-size:11px;color:var(--dim);}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:4px;}
+
+/* ── CELEBRATION OVERLAY ── */
+#cel-overlay{display:none;position:fixed;inset:0;background:rgba(7,8,15,0.88);z-index:100;align-items:center;justify-content:center;flex-direction:column;gap:1rem;}
+#cel-overlay.show{display:flex;}
+#cel-card{width:520px;background:var(--surface);border:0.5px solid rgba(255,255,255,0.1);border-radius:20px;overflow:hidden;animation:slideUp .5s cubic-bezier(.22,.68,0,1.2);}
+@keyframes slideUp{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}
+.cel-top{background:#111629;padding:2rem 2rem 1.6rem;text-align:center;border-bottom:0.5px solid rgba(255,255,255,0.07);position:relative;}
+.sound-tag{position:absolute;top:12px;right:14px;font-size:9px;letter-spacing:.07em;text-transform:uppercase;padding:3px 10px;border-radius:99px;font-weight:500;background:rgba(57,232,162,0.1);color:#39e8a2;}
+.confetti-row{display:flex;justify-content:center;gap:5px;margin-bottom:1rem;}
+.conf{width:8px;height:8px;border-radius:2px;animation:confSpin 1.3s ease infinite;}
+@keyframes confSpin{0%,100%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.4)}}
+.cel-trophy{font-size:48px;margin-bottom:.5rem;display:block;animation:trophyBounce .8s cubic-bezier(.22,.68,0,1.2) .15s both;}
+@keyframes trophyBounce{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.cel-intake-label{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:rgba(255,255,255,0.3);margin-bottom:.4rem;}
+.cel-name{font-family:var(--font-head);font-size:32px;font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1.1;margin-bottom:.25rem;animation:nameIn .5s ease .25s both;}
+@keyframes nameIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.cel-hl{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:1.2rem;}
+.cel-hl span{color:var(--green);font-weight:500;}
+.cel-stats{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;}
+.cel-chip{background:#07080f;border:0.5px solid rgba(255,255,255,0.08);border-radius:99px;padding:5px 15px;font-size:12px;color:rgba(255,255,255,0.45);display:flex;align-items:center;gap:6px;}
+.cel-chip strong{color:#fff;font-weight:500;}
+.cdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.cel-bottom{padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;}
+.cel-firm strong{color:rgba(255,255,255,0.6);font-weight:500;display:block;font-size:13px;margin-bottom:2px;}
+.cel-firm span{font-size:11px;color:rgba(255,255,255,0.25);}
+.cel-time{font-size:11px;color:rgba(255,255,255,0.2);}
+.cel-progress-wrap{width:520px;display:flex;align-items:center;gap:10px;}
+.cel-progress-bar{flex:1;height:2px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;}
+.cel-progress-fill{height:100%;background:var(--green);border-radius:2px;}
+.cel-countdown{font-size:11px;color:rgba(255,255,255,0.2);white-space:nowrap;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">intake<span>.</span>board</div>
+    <div class="header-right">
+      <span id="mode-badge" class="badge badge-loading"><span class="pulse"></span> connecting…</span>
+      <div id="clock"></div>
+    </div>
+  </header>
+  <div class="stats-bar">
+    <div class="stat" style="--accent:var(--green)"><div class="stat-label" id="s1-label">Total today</div><div class="stat-value" id="s1-val">—</div><div class="stat-sub" id="s1-sub"></div></div>
+    <div class="stat" style="--accent:var(--purple)"><div class="stat-label" id="s2-label">Top agent</div><div class="stat-value" id="s2-val">—</div><div class="stat-sub" id="s2-sub"></div></div>
+    <div class="stat" style="--accent:var(--amber)"><div class="stat-label" id="s3-label">Active agents</div><div class="stat-value" id="s3-val">—</div><div class="stat-sub" id="s3-sub"></div></div>
+    <div class="stat" style="--accent:var(--blue)"><div class="stat-label">Shift</div><div class="stat-value" style="font-size:17px;padding-top:6px">6:30–17:00 PST</div><div class="stat-sub" id="s4-sub"></div></div>
+  </div>
+  <div class="table-wrap">
+    <div class="table-scroll"><table><thead id="table-head"></thead><tbody id="table-body"></tbody></table></div>
+  </div>
+  <div class="footer">
+    <span class="footer-note">Auto-refreshes every 60 s · PST · Random cheer per intake · 9 s celebration</span>
+    <span id="last-updated"></span>
+  </div>
+</div>
+
+<!-- CELEBRATION OVERLAY -->
+<div id="cel-overlay">
+  <div id="cel-card">
+    <div class="cel-top">
+      <span class="sound-tag" id="cel-sound-tag">🎉 cheer</span>
+      <div class="confetti-row" id="cel-confetti"></div>
+      <span class="cel-trophy" id="cel-trophy">🎯</span>
+      <div class="cel-intake-label">New intake</div>
+      <div class="cel-name" id="cel-name"></div>
+      <div class="cel-hl">Just closed intake <span id="cel-num"></span> today</div>
+      <div class="cel-stats">
+        <div class="cel-chip"><div class="cdot" style="background:var(--green)"></div>Today <strong id="cel-today"></strong></div>
+        <div class="cel-chip"><div class="cdot" style="background:var(--purple)"></div>WTD <strong id="cel-wtd"></strong></div>
+        <div class="cel-chip"><div class="cdot" style="background:var(--amber)"></div>MTD <strong id="cel-mtd"></strong></div>
+      </div>
+    </div>
+    <div class="cel-bottom">
+      <div class="cel-firm"><strong id="cel-firm"></strong><span id="cel-camp"></span></div>
+      <div class="cel-time" id="cel-time"></div>
+    </div>
+  </div>
+  <div class="cel-progress-wrap">
+    <div class="cel-progress-bar"><div class="cel-progress-fill" id="cel-prog"></div></div>
+    <div class="cel-countdown" id="cel-countdown">9s</div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────
+var SCRIPT_URL   = "https://script.google.com/macros/s/AKfycbzbcF8a4uql2TBYGRwb1dwTFg0DuvfeHcjsSAV0bzsgob-XiXo5BbQllekElj9VIjcyRA/exec";
+var DISPLAY_SECS = 9;
+// ─────────────────────────────────────────────────────────
+
+var COLORS=[
+  {color:"#39e8a2",bg:"rgba(57,232,162,0.15)"},{color:"#b09dff",bg:"rgba(176,157,255,0.15)"},
+  {color:"#ffc86b",bg:"rgba(255,200,107,0.15)"},{color:"#6eb3ff",bg:"rgba(110,179,255,0.15)"},
+  {color:"#ff8a72",bg:"rgba(255,138,114,0.15)"},{color:"#f472b6",bg:"rgba(244,114,182,0.15)"},
+  {color:"#34d399",bg:"rgba(52,211,153,0.15)"},{color:"#a78bfa",bg:"rgba(167,139,250,0.15)"},
+  {color:"#fb923c",bg:"rgba(251,146,60,0.15)"},{color:"#38bdf8",bg:"rgba(56,189,248,0.15)"},
+];
+var CONF_COLORS=["#39e8a2","#b09dff","#ffc86b","#6eb3ff","#ff8a72","#f472b6"];
+var TROPHIES=["🎯","⚡","✨","🔥","💥","🌟","🎊","🏆","👑","🚀"];
+var agentColors={},colorIdx=0,knownRows=null,celQueue=[],celActive=false,celTimer=null,countdownItv=null,actx=null;
+
+function getColor(n){if(!agentColors[n])agentColors[n]=COLORS[colorIdx++%COLORS.length];return agentColors[n];}
+function initials(n){return n.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();}
+function rankIcon(i){if(i===0)return'🥇';if(i===1)return'🥈';if(i===2)return'🥉';return'<span class="rank-num">'+(i+1)+'</span>';}
+function rnd(a,b){return a+Math.random()*(b-a);}
+
+// ── CLOCK ─────────────────────────────────────────────────
+function tickClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'America/Los_Angeles'});}
+setInterval(tickClock,1000);tickClock();
+
+// ── AUDIO ENGINE ──────────────────────────────────────────
+function ac(){if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();return actx;}
+
+function crowdNoise(c,t,dur,vol,lo,hi,envFn){
+  var sr=c.sampleRate;
+  var buf=c.createBuffer(2,Math.floor(sr*dur),sr);
+  for(var ch=0;ch<2;ch++){
+    var d=buf.getChannelData(ch);
+    for(var i=0;i<d.length;i++){var p=i/d.length;d[i]=(Math.random()*2-1)*(envFn?envFn(p):1)*vol;}
+  }
+  var src=c.createBufferSource();src.buffer=buf;
+  var hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=lo||300;
+  var lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=hi||3500;
+  var pk=c.createBiquadFilter();pk.type='peaking';pk.frequency.value=800;pk.gain.value=5;
+  src.connect(hp);hp.connect(pk);pk.connect(lp);lp.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.1);
+}
+
+function clap(c,t,vol){
+  var dur=0.15;var sr=c.sampleRate;
+  var buf=c.createBuffer(2,Math.floor(sr*dur),sr);
+  for(var ch=0;ch<2;ch++){var d=buf.getChannelData(ch);for(var i=0;i<d.length;i++){var p=i/d.length;var e=p<0.05?p/0.05:Math.pow(1-p,2.2);d[i]=(Math.random()*2-1)*e;}}
+  var src=c.createBufferSource();src.buffer=buf;
+  var hp=c.createBiquadFilter();hp.type='highpass';hp.frequency.value=900;
+  var lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=6000;
+  var g=c.createGain();g.gain.value=vol;
+  src.connect(hp);hp.connect(lp);lp.connect(g);g.connect(c.destination);
+  src.start(t);src.stop(t+dur+0.05);
+}
+
+function whistle(c,t,vol){
+  var osc=c.createOscillator();var g=c.createGain();
+  osc.type='sine';osc.frequency.setValueAtTime(1400,t);osc.frequency.linearRampToValueAtTime(1800,t+0.15);osc.frequency.linearRampToValueAtTime(1600,t+0.5);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol*0.32,t+0.05);g.gain.setValueAtTime(vol*0.32,t+0.4);g.gain.exponentialRampToValueAtTime(0.001,t+0.9);
+  osc.connect(g);g.connect(c.destination);osc.start(t);osc.stop(t+1);
+}
+
+function woo(c,t,vol){
+  var osc=c.createOscillator();var g=c.createGain();
+  osc.type='sawtooth';osc.frequency.setValueAtTime(280,t);osc.frequency.linearRampToValueAtTime(420,t+0.6);osc.frequency.linearRampToValueAtTime(380,t+1.2);
+  var lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.value=900;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol*0.25,t+0.1);g.gain.setValueAtTime(vol*0.25,t+1);g.gain.exponentialRampToValueAtTime(0.001,t+1.8);
+  osc.connect(lp);lp.connect(g);g.connect(c.destination);osc.start(t);osc.stop(t+2);
+}
+
+// Pool of 9 crowd sounds — one picked randomly per intake
+var SOUNDS=[
+  {name:"Polite applause", fn:function(c,t,v){
+    crowdNoise(c,t,9,v*0.55,400,4000,function(p){var f=p<0.1?p/0.1:p>0.85?(1-p)/0.15:1;return f*(0.75+0.25*Math.sin(p*Math.PI*16))*0.7;});
+    [0.1,0.45,0.78,1.1,1.42,1.76,2.1,2.45,2.78,3.1,3.5,3.9,4.3,4.7,5.1,5.5,5.9,6.3,6.7,7.1,7.5].forEach(function(d){clap(c,t+d,v*(0.5+Math.random()*0.3));});
+  }},
+  {name:"Single clap + echo", fn:function(c,t,v){
+    clap(c,t,v);clap(c,t+0.02,v*0.7);
+    crowdNoise(c,t+0.3,8,v*0.35,500,3000,function(p){return p<0.15?p/0.15:Math.pow(1-p,1.2)*0.8;});
+    [1.2,2.5,3.8,5.1,6.4].forEach(function(d){clap(c,t+d,v*0.4);});
+  }},
+  {name:"Cheer + whistle", fn:function(c,t,v){
+    crowdNoise(c,t,9,v*0.5,350,3500,function(p){return p<0.1?p/0.1:p>0.85?(1-p)/0.15:0.8;});
+    [0.05,0.38,0.72,1.05,1.4,1.75,2.1,2.5,2.9,3.3,3.7,4.1,4.5,5.0,5.5,6.0,6.5,7.0,7.5].forEach(function(d){clap(c,t+d,v*(0.4+Math.random()*0.25));});
+    whistle(c,t+0.5,v);whistle(c,t+3.2,v*0.8);
+  }},
+  {name:"Crowd cheer", fn:function(c,t,v){
+    crowdNoise(c,t,9,v*0.75,300,4500,function(p){if(p<0.25)return Math.pow(p/0.25,1.5)*0.9;if(p>0.75)return Math.pow(1-(p-0.75)/0.25,1.2)*0.85;return 0.9+0.1*Math.sin(p*Math.PI*6);});
+    for(var i=0;i<30;i++){var d=i*0.3+Math.random()*0.1;if(d<9)clap(c,t+d,v*(0.35+Math.random()*0.3));}
+    whistle(c,t+2,v*0.9);whistle(c,t+5,v*0.7);
+  }},
+  {name:"Rhythmic clapping", fn:function(c,t,v){
+    var pat=[0,0.55,1.1,1.65,2.1,2.55,2.9,3.25,3.6,3.85,4.1,4.35,4.6,4.85,5.05,5.25,5.45,5.65,5.85,6.05,6.25,6.45,6.65,6.85,7.05,7.25,7.5,7.75];
+    pat.forEach(function(d,i){var s=0.5+Math.min(i/20,1)*0.4;clap(c,t+d,v*s);if(i>10)clap(c,t+d+0.01,v*s*0.6);});
+    crowdNoise(c,t+1,7,v*0.4,400,3000,function(p){return p<0.15?p/0.15:p>0.85?(1-p)/0.15:0.6;});
+    whistle(c,t+4,v*0.85);
+  }},
+  {name:"Crowd woo + clap", fn:function(c,t,v){
+    woo(c,t,v);woo(c,t+0.15,v*0.75);
+    crowdNoise(c,t+1.2,7.8,v*0.65,300,4000,function(p){return p<0.12?p/0.12:p>0.8?(1-p)/0.2:0.85+0.15*Math.sin(p*Math.PI*5);});
+    for(var i=0;i<28;i++){var d=1.3+i*0.28+Math.random()*0.08;if(d<9)clap(c,t+d,v*(0.4+Math.random()*0.3));}
+    whistle(c,t+2.5,v);woo(c,t+4.5,v*0.6);
+  }},
+  {name:"Stadium roar", fn:function(c,t,v){
+    crowdNoise(c,t,9,v*0.8,200,5000,function(p){var r=p<0.2?Math.pow(p/0.2,0.8):1;var f=p>0.75?Math.pow(1-(p-0.75)/0.25,1.5):1;return r*f;});
+    crowdNoise(c,t,9,v*0.5,600,2500,function(p){return p<0.1?p/0.1:p>0.8?(1-p)/0.2:0.7+0.3*Math.sin(p*Math.PI*8);});
+    for(var i=0;i<35;i++){var d=i*0.26+Math.random()*0.12;if(d<9)clap(c,t+d,v*(0.4+Math.random()*0.45));}
+    whistle(c,t+0.5,v);whistle(c,t+2,v*0.9);whistle(c,t+4.5,v*0.8);
+    woo(c,t+0.3,v*0.8);woo(c,t+3,v*0.6);
+  }},
+  {name:"Crowd chant + roar", fn:function(c,t,v){
+    for(var i=0;i<8;i++){var s=t+i*0.55;var st=0.4+i/8*0.5;crowdNoise(c,s,0.45,v*st*0.7,300,3500,function(p){return p<0.1?p/0.1:p>0.7?(1-p)/0.3:1;});clap(c,s,v*st*0.8);if(i%2===0)woo(c,s+0.05,v*st*0.5);}
+    crowdNoise(c,t+4.5,4.5,v*0.85,250,4500,function(p){return p<0.2?Math.pow(p/0.2,0.7):p>0.75?Math.pow(1-(p-0.75)/0.25,1.5):1;});
+    for(var j=0;j<18;j++){var d=4.6+j*0.25+Math.random()*0.08;if(d<9)clap(c,t+d,v*(0.5+Math.random()*0.4));}
+    whistle(c,t+5,v);whistle(c,t+7,v*0.85);
+  }},
+  {name:"Big cheer + clap", fn:function(c,t,v){
+    crowdNoise(c,t,4,v*0.85,250,5000,function(p){return p<0.08?p/0.08:p>0.7?Math.pow(1-(p-0.7)/0.3,0.8):1;});
+    crowdNoise(c,t+3.5,5.5,v*0.7,400,4000,function(p){return p<0.1?p/0.1:p>0.75?(1-p)/0.25:0.8+0.2*Math.sin(p*Math.PI*6);});
+    for(var i=0;i<32;i++){var d=i*0.28+Math.random()*0.1;if(d<9)clap(c,t+d,v*(0.45+Math.random()*0.45));}
+    whistle(c,t+0.2,v);whistle(c,t+1.5,v*0.85);whistle(c,t+5.5,v*0.7);
+    woo(c,t+0.1,v*0.9);woo(c,t+3.8,v*0.6);
+  }}
+];
+
+// Last played index — avoid repeating same sound back-to-back
+var lastSoundIdx = -1;
+function pickSound(){
+  var idx;
+  do { idx=Math.floor(Math.random()*SOUNDS.length); } while(idx===lastSoundIdx && SOUNDS.length>1);
+  lastSoundIdx=idx;
+  return SOUNDS[idx];
+}
+
+function playRandomCheer(){
+  var s=pickSound();
+  var c=ac();
+  s.fn(c, c.currentTime, 0.65);
+  return s.name;
+}
+
+// ── CELEBRATION QUEUE ─────────────────────────────────────
+function queueCelebration(row,todayCount,wtd,mtd){celQueue.push({row:row,todayCount:todayCount,wtd:wtd,mtd:mtd});if(!celActive)nextCelebration();}
+
+function nextCelebration(){
+  if(!celQueue.length){celActive=false;hideCelebration();return;}
+  celActive=true;
+  showCelebration(celQueue.shift());
+}
+
+function showCelebration(item){
+  var row=item.row,today=item.todayCount,wtd=item.wtd,mtd=item.mtd;
+  document.getElementById('cel-name').textContent=row.agent;
+  document.getElementById('cel-num').textContent='#'+today;
+  document.getElementById('cel-today').textContent=today;
+  document.getElementById('cel-wtd').textContent=wtd;
+  document.getElementById('cel-mtd').textContent=mtd;
+  document.getElementById('cel-firm').textContent=row.firm||'';
+  document.getElementById('cel-camp').textContent=row.campaign||'';
+  document.getElementById('cel-time').textContent=(row.time||'')+' PST';
+  document.getElementById('cel-trophy').textContent=TROPHIES[Math.floor(Math.random()*TROPHIES.length)];
+
+  // Confetti
+  var conf=document.getElementById('cel-confetti');conf.innerHTML='';
+  for(var i=0;i<10;i++){var el=document.createElement('div');el.className='conf';el.style.background=CONF_COLORS[i%CONF_COLORS.length];el.style.animationDelay=(i*0.07)+'s';conf.appendChild(el);}
+
+  // Restart card animation
+  var card=document.getElementById('cel-card');card.style.animation='none';card.offsetHeight;card.style.animation='slideUp .5s cubic-bezier(.22,.68,0,1.2)';
+
+  // Show overlay
+  document.getElementById('cel-overlay').classList.add('show');
+
+  // Play random cheer & show its name
+  var soundName=playRandomCheer();
+  document.getElementById('cel-sound-tag').textContent='🎉 '+soundName;
+
+  // Progress bar
+  var prog=document.getElementById('cel-prog');
+  prog.style.transition='none';prog.style.width='100%';prog.offsetHeight;
+  prog.style.transition='width '+DISPLAY_SECS+'s linear';prog.style.width='0%';
+
+  // Countdown
+  var rem=DISPLAY_SECS;
+  document.getElementById('cel-countdown').textContent=rem+'s';
+  clearInterval(countdownItv);
+  countdownItv=setInterval(function(){rem--;document.getElementById('cel-countdown').textContent=rem+'s';if(rem<=0)clearInterval(countdownItv);},1000);
+
+  clearTimeout(celTimer);
+  celTimer=setTimeout(nextCelebration,DISPLAY_SECS*1000);
+}
+
+function hideCelebration(){document.getElementById('cel-overlay').classList.remove('show');}
+
+// ── FETCH & DIFF ──────────────────────────────────────────
+function fetchData(){
+  if(!SCRIPT_URL||SCRIPT_URL.indexOf('PASTE')!==-1){renderDemo();return;}
+  fetch(SCRIPT_URL).then(function(r){return r.json();}).then(render).catch(renderError);
+}
+
+function render(data){
+  var badge=document.getElementById('mode-badge');
+  document.getElementById('last-updated').textContent='Updated: '+new Date().toLocaleTimeString('en-US',{timeZone:'America/Los_Angeles'});
+  if(data.mode==='live'){
+    badge.className='badge badge-live';badge.innerHTML='<span class="pulse"></span> Live — today';
+    processLiveRows(data.liveRows||[]);
+  } else {
+    badge.className='badge badge-summary';badge.innerHTML='<span class="pulse" style="animation:none;opacity:.6"></span> Summary';
+    renderSummary(data.summaryRows||[]);knownRows=null;
+  }
+}
+
+function processLiveRows(rows){
+  if(knownRows!==null&&rows.length>knownRows.length){
+    var newOnes=rows.slice(knownRows.length);
+    var agentToday={};rows.forEach(function(r){agentToday[r.agent]=(agentToday[r.agent]||0)+1;});
+    newOnes.forEach(function(row){queueCelebration(row,agentToday[row.agent]||1,0,0);});
+  }
+  knownRows=rows;renderLive(rows);
+}
+
+function renderLive(rows){
+  var totals={},lastTime={},lastCamp={};
+  rows.forEach(function(r){totals[r.agent]=(totals[r.agent]||0)+1;lastTime[r.agent]=r.time;lastCamp[r.agent]=r.campaign;});
+  var agents=Object.keys(totals).sort(function(a,b){return totals[b]-totals[a];});
+  var total=rows.length,top=agents[0];
+  document.getElementById('s1-label').textContent='Total intakes';document.getElementById('s1-val').textContent=total;document.getElementById('s1-sub').textContent=agents.length+' agent'+(agents.length!==1?'s':'')+' active';
+  document.getElementById('s2-label').textContent='Top agent';document.getElementById('s2-val').textContent=top?top.split(' ')[0]:'—';document.getElementById('s2-sub').textContent=top?totals[top]+' intake'+(totals[top]!==1?'s':''):'';
+  document.getElementById('s3-label').textContent='Active agents';document.getElementById('s3-val').textContent=agents.length;document.getElementById('s3-sub').textContent='';
+  document.getElementById('table-head').innerHTML='<tr><th class="col-rank">#</th><th class="col-name">Agent</th><th class="col-pill" style="text-align:center">Intakes</th><th class="col-camp">Campaign</th><th class="col-time">Last time</th></tr>';
+  if(!agents.length){document.getElementById('table-body').innerHTML='<tr><td colspan="5"><div class="empty-state">No intakes logged yet today</div></td></tr>';return;}
+  document.getElementById('table-body').innerHTML=agents.map(function(agent,i){var c=getColor(agent);return'<tr><td class="col-rank">'+rankIcon(i)+'</td><td><span class="avatar" style="background:'+c.bg+';color:'+c.color+'">'+initials(agent)+'</span><span class="agent-name-cell">'+agent+'</span></td><td class="col-pill" style="text-align:center"><span class="pill pill-green">'+totals[agent]+'</span></td><td><span class="muted-text">'+(lastCamp[agent]||'')+'</span></td><td class="col-time muted-text">'+(lastTime[agent]||'')+'</td></tr>';}).join('');
+}
+
+function renderSummary(rows){
+  var sorted=rows.slice().sort(function(a,b){return b.ytd-a.ytd;});
+  var totYtd=rows.reduce(function(s,r){return s+r.ytd;},0),totMtd=rows.reduce(function(s,r){return s+r.mtd;},0),top=sorted[0];
+  document.getElementById('s1-label').textContent='Yesterday total';document.getElementById('s1-val').textContent=totYtd;document.getElementById('s1-sub').textContent=rows.length+' agents';
+  document.getElementById('s2-label').textContent='Best yesterday';document.getElementById('s2-val').textContent=top?top.agent.split(' ')[0]:'—';document.getElementById('s2-sub').textContent=top?top.ytd+' intakes':'';
+  document.getElementById('s3-label').textContent='MTD total';document.getElementById('s3-val').textContent=totMtd;document.getElementById('s3-sub').textContent='across all agents';
+  document.getElementById('table-head').innerHTML='<tr><th class="col-rank">#</th><th class="col-name">Agent</th><th class="col-pill" style="text-align:center">Yesterday</th><th class="col-pill" style="text-align:center">WTD</th><th class="col-pill" style="text-align:center">MTD</th></tr>';
+  if(!sorted.length){document.getElementById('table-body').innerHTML='<tr><td colspan="5"><div class="empty-state">Summary data appears at shift start</div></td></tr>';return;}
+  document.getElementById('table-body').innerHTML=sorted.map(function(row,i){var c=getColor(row.agent);return'<tr><td class="col-rank">'+rankIcon(i)+'</td><td><span class="avatar" style="background:'+c.bg+';color:'+c.color+'">'+initials(row.agent)+'</span><span class="agent-name-cell">'+row.agent+'</span></td><td class="col-pill" style="text-align:center"><span class="pill pill-purple">'+row.ytd+'</span></td><td class="col-pill" style="text-align:center"><span class="pill pill-amber">'+row.wtd+'</span></td><td class="col-pill" style="text-align:center"><span class="pill pill-blue">'+row.mtd+'</span></td></tr>';}).join('');
+}
+
+function renderError(){document.getElementById('mode-badge').className='badge badge-loading';document.getElementById('mode-badge').innerHTML='<span class="pulse"></span> reconnecting…';document.getElementById('last-updated').textContent='Connection error — retrying…';}
+
+// ── DEMO MODE ─────────────────────────────────────────────
+var DEMO_AGENTS=['Shruti Fouzdar','Jiffin Thomas','Ranjit Das','Jitu Brahma','Sakshi Mishra','Kumkum Kapoor','Isha Kashyap','Rahul Kumar Gupta'];
+var demoRows=[],demoTick=0;
+function renderDemo(){
+  var h=new Date().getHours();
+  if(h>=6&&h<17){
+    if(!demoRows.length)DEMO_AGENTS.slice(0,5).forEach(function(a,i){demoRows.push({agent:a,time:'0'+(6+i)+':45',campaign:'HMAMDOFF',firm:'Fortis Disability (Initial)'}); });
+    demoTick++;
+    if(demoTick%2===0&&demoRows.length<20){demoRows.push({agent:DEMO_AGENTS[Math.floor(Math.random()*DEMO_AGENTS.length)],time:new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',timeZone:'America/Los_Angeles'}),campaign:'HI Touch',firm:'Brown and Brown'});}
+    render({mode:'live',liveRows:demoRows});
+  } else {
+    render({mode:'summary',summaryRows:DEMO_AGENTS.map(function(a){return{agent:a,ytd:Math.floor(Math.random()*8)+1,wtd:Math.floor(Math.random()*22)+5,mtd:Math.floor(Math.random()*60)+20};})});
+  }
+  document.getElementById('last-updated').textContent='Demo mode — paste Apps Script URL to go live';
+}
+
+fetchData();
+setInterval(fetchData,60000);
+</script>
+</body>
+</html>
