@@ -272,26 +272,6 @@ footer{display:flex;justify-content:space-between;padding:4px 6px}
       </div>
     </div>
 
-    <!-- Detailed tort table -->
-    <div class="table-container">
-      <div class="tbl-top">
-        <div class="tbl-title">Tort Type Detail</div>
-        <div class="tbl-sub">All intakes grouped by SSD · SSI · ISA</div>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th class="c-rank">#</th>
-            <th class="c-name">Agent</th>
-            <th class="c-int">Type</th>
-            <th class="c-int">Today</th>
-            <th class="c-int">WTD</th>
-            <th class="c-int">MTD</th>
-          </tr>
-        </thead>
-        <tbody id="tort-body"></tbody>
-      </table>
-    </div>
   </div>
 
   <footer>
@@ -374,11 +354,6 @@ var FIRM_COLORS = [
   {bg:"#fdf2f8",color:"#9d174d",border:"#f9a8d4"},
 ];
 
-var TORT_COLORS = {
-  SSD: {bg:"#eff6ff",color:"#1d4ed8",border:"#93c5fd"},
-  SSI: {bg:"#f5f3ff",color:"#6d28d9",border:"#c4b5fd"},
-  ISA: {bg:"#ecfdf5",color:"#047857",border:"#6ee7b7"},
-};
 
 var agentColors = {}, colorIdx = 0;
 var campColorMap = {}, campColorIdx = 0;
@@ -540,7 +515,7 @@ function processLiveRows(rows, agentTotals, firmTotals, tortTotals){
   knownRows=rows;
   renderLeaderboard(rows, agentTotals);
   renderFirms(firmTotals, rows);
-  renderTort(tortTotals, rows, agentTotals);
+  renderTort(tortTotals, rows);
 }
 
 // ─── TAB 1: LEADERBOARD ────────────────────────────────────────────────────
@@ -634,17 +609,17 @@ function renderFirms(firmTotals, liveRows){
 }
 
 // ─── TAB 3: TORT TYPE BREAKDOWN ────────────────────────────────────────────
-function renderTort(tortTotals, liveRows, agentTotals){
+function renderTort(tortTotals, liveRows){
   // Today counts from live rows by tort
   var todayTort={SSD:0,SSI:0,ISA:0};
   liveRows.forEach(function(r){
     var tort=String(r.tort||'').trim().toUpperCase();
-    if(tort==='SSD')todayTort.SSD++;
-    else if(tort==='SSI')todayTort.SSI++;
-    else if(tort==='ISA')todayTort.ISA++;
+    if(tort==='SSD') todayTort.SSD++;
+    else if(tort==='SSI') todayTort.SSI++;
+    else if(tort==='ISA') todayTort.ISA++;
   });
 
-  // WTD/MTD from Apps Script
+  // WTD / MTD from Apps Script
   var ssd=tortTotals.SSD||{wtd:0,mtd:0};
   var ssi=tortTotals.SSI||{wtd:0,mtd:0};
   var isa=tortTotals.ISA||{wtd:0,mtd:0};
@@ -658,41 +633,6 @@ function renderTort(tortTotals, liveRows, agentTotals){
   document.getElementById('isa-today').textContent=todayTort.ISA;
   document.getElementById('isa-wtd').textContent=isa.wtd;
   document.getElementById('isa-mtd').textContent=isa.mtd;
-
-  // Detailed table: per agent per tort type
-  var agentTort={};
-  liveRows.forEach(function(r){
-    var tort=String(r.tort||'').trim().toUpperCase();
-    if(!['SSD','SSI','ISA'].includes(tort)) return;
-    var key=r.agent+'||'+tort;
-    agentTort[key]=(agentTort[key]||{agent:r.agent,tort:tort,today:0});
-    agentTort[key].today++;
-  });
-
-  var rows=Object.values(agentTort).sort(function(a,b){
-    if(a.tort<b.tort)return -1; if(a.tort>b.tort)return 1;
-    return b.today-a.today;
-  });
-
-  if(!rows.length){
-    document.getElementById('tort-body').innerHTML='<tr><td colspan="6"><div class="empty">No tort data yet today</div></td></tr>';
-    return;
-  }
-
-  document.getElementById('tort-body').innerHTML=rows.map(function(row,i){
-    var c=getAgentColor(row.agent);
-    var tc=TORT_COLORS[row.tort]||{bg:"#f1f5f9",color:"#64748b",border:"#cbd5e1"};
-    var at=agentTotals[row.agent]||{wtd:0,mtd:0};
-    return'<tr>'+
-      '<td class="rank-cell"><span class="rank-num">'+(i+1)+'</span></td>'+
-      '<td><div class="agent-row"><div class="av" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+initials(row.agent)+'</div>'+
-      '<span class="agent-name">'+row.agent+'</span></div></td>'+
-      '<td style="text-align:center"><span class="int-badge" style="background:'+tc.bg+';color:'+tc.color+';border-color:'+tc.border+'">'+row.tort+'</span></td>'+
-      '<td style="text-align:center"><span class="int-badge" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+row.today+'</span></td>'+
-      '<td style="text-align:center"><span class="int-badge" style="background:#f5f3ff;color:#6d28d9;border-color:#c4b5fd">'+at.wtd+'</span></td>'+
-      '<td style="text-align:center"><span class="int-badge" style="background:#ecfdf5;color:#047857;border-color:#6ee7b7">'+at.mtd+'</span></td>'+
-      '</tr>';
-  }).join('');
 }
 
 // ─── ERROR STATE ───────────────────────────────────────────────────────────
