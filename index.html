@@ -8,11 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#f0f4ff;
-  --font:'Inter',sans-serif;
-  --font-head:'Space Grotesk',sans-serif;
-}
+:root{--bg:#f0f4ff;--font:'Inter',sans-serif;--font-head:'Space Grotesk',sans-serif;}
 html,body{height:100%;background:var(--bg);font-family:var(--font);color:#0a1628;font-size:18px;line-height:1.5}
 #app{padding:24px 32px;display:flex;flex-direction:column;gap:18px;min-height:100vh}
 
@@ -20,11 +16,17 @@ html,body{height:100%;background:var(--bg);font-family:var(--font);color:#0a1628
 header{background:#1e40af;border-radius:20px;padding:20px 32px;display:flex;align-items:center;justify-content:space-between}
 .logo{font-family:var(--font-head);font-size:36px;font-weight:800;color:#fff;letter-spacing:-.02em}
 .logo em{color:#fbbf24;font-style:normal}
-.header-right{display:flex;align-items:center;gap:20px}
+.header-right{display:flex;align-items:center;gap:14px}
 .live-pill{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.18);color:#fff;border:2px solid rgba(255,255,255,0.4);border-radius:99px;padding:8px 22px;font-size:15px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
 .dot{width:9px;height:9px;border-radius:50%;background:#4ade80;animation:blink 1.6s ease infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 #clock{font-family:var(--font-head);font-size:34px;font-weight:800;color:#fbbf24;letter-spacing:.02em}
+
+/* MODE TOGGLE BUTTONS in header */
+.mode-btn{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,0.12);color:rgba(255,255,255,.8);border:2px solid rgba(255,255,255,0.25);border-radius:99px;padding:8px 20px;font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;transition:all .18s;font-family:var(--font-head)}
+.mode-btn:hover{background:rgba(255,255,255,0.22);color:#fff;border-color:rgba(255,255,255,0.5)}
+.mode-btn.active{background:#fff;color:#1e40af;border-color:#fff}
+.mode-btn .btn-icon{font-size:16px}
 
 /* STATS */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
@@ -37,14 +39,26 @@ header{background:#1e40af;border-radius:20px;padding:20px 32px;display:flex;alig
 .stat-shimmer{position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)}
 
 /* TAB NAV */
-.tab-nav{display:flex;gap:8px}
+.tab-nav{display:flex;gap:8px;align-items:center}
 .tab-btn{font-family:var(--font-head);font-size:16px;font-weight:700;padding:12px 28px;border-radius:12px;border:2px solid #dbeafe;background:#fff;color:#3b82f6;cursor:pointer;transition:all .18s;letter-spacing:.01em}
 .tab-btn:hover{background:#eff6ff;border-color:#93c5fd}
 .tab-btn.active{background:#1e40af;color:#fff;border-color:#1e40af}
 
+/* HISTORIC DATE PICKER BAR */
+#historic-bar{background:#fff;border:2px solid #dbeafe;border-radius:16px;padding:18px 28px;display:none;align-items:center;gap:16px;flex-wrap:wrap}
+#historic-bar.show{display:flex}
+.date-label{font-size:15px;font-weight:700;color:#1e3a8a;white-space:nowrap}
+.date-input{font-family:var(--font-head);font-size:16px;font-weight:600;color:#0f172a;border:2px solid #dbeafe;border-radius:10px;padding:9px 16px;background:#f8faff;cursor:pointer;outline:none}
+.date-input:focus{border-color:#3b82f6;background:#fff}
+.date-sep{font-size:20px;color:#94a3b8;font-weight:700}
+.fetch-hist-btn{font-family:var(--font-head);font-size:15px;font-weight:800;padding:10px 28px;border-radius:10px;border:none;background:#1e40af;color:#fff;cursor:pointer;transition:background .15s;white-space:nowrap}
+.fetch-hist-btn:hover{background:#1d4ed8}
+.fetch-hist-btn:disabled{background:#94a3b8;cursor:not-allowed}
+.hist-range-label{font-size:14px;color:#64748b;font-weight:600;margin-left:auto}
+#hist-loading{font-size:14px;color:#3b82f6;font-weight:600;display:none}
+
 /* TAB PANELS */
-.tab-panel{display:none}
-.tab-panel.active{display:block}
+.tab-panel{display:none}.tab-panel.active{display:block}
 
 /* TABLE SHARED */
 .table-container{background:#fff;border-radius:18px;overflow:hidden;border:2px solid #dbeafe}
@@ -65,8 +79,7 @@ tbody tr:nth-child(even){background:#f8faff}
 tbody tr:nth-child(even):hover{background:#eff6ff}
 tbody td{padding:14px 24px;vertical-align:middle}
 .rank-cell{text-align:center}
-.medal{font-size:28px}
-.rank-num{font-family:var(--font-head);font-size:20px;font-weight:800;color:#94a3b8}
+.medal{font-size:28px}.rank-num{font-family:var(--font-head);font-size:20px;font-weight:800;color:#94a3b8}
 .agent-row{display:flex;align-items:center;gap:16px}
 .av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;flex-shrink:0;font-family:var(--font-head);border:3px solid}
 .agent-name{font-family:var(--font-head);font-size:22px;font-weight:800;color:#0f172a}
@@ -76,19 +89,23 @@ tbody td{padding:14px 24px;vertical-align:middle}
 .time-val{font-size:15px;color:#64748b;text-align:right;font-weight:600}
 .empty{text-align:center;padding:48px;color:#94a3b8;font-size:18px}
 
-/* TORT SUMMARY TAB */
-.tort-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px}
-.tort-card{border-radius:18px;padding:22px 26px;position:relative;overflow:hidden;color:#fff}
+/* PRODUCT BREAKDOWN TAB */
+.tort-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tort-card{border-radius:18px;padding:26px 30px;position:relative;overflow:hidden;color:#fff}
 .tc-ssd{background:linear-gradient(135deg,#1e40af,#3b82f6)}
 .tc-ssi{background:linear-gradient(135deg,#6d28d9,#a78bfa)}
 .tc-isa{background:linear-gradient(135deg,#059669,#34d399)}
 .tort-card-label{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:8px}
-.tort-card-type{font-family:var(--font-head);font-size:28px;font-weight:800;color:#fff;margin-bottom:14px}
-.tort-numbers{display:flex;gap:20px}
+.tort-card-type{font-family:var(--font-head);font-size:32px;font-weight:800;color:#fff;margin-bottom:18px}
+.tort-numbers{display:flex;gap:28px}
 .tort-num-block{text-align:center}
-.tort-num-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:4px}
-.tort-num-val{font-family:var(--font-head);font-size:38px;font-weight:800;color:#fff;line-height:1}
-.tort-shimmer{position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.08)}
+.tort-num-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:6px}
+.tort-num-val{font-family:var(--font-head);font-size:48px;font-weight:800;color:#fff;line-height:1}
+.tort-shimmer{position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:rgba(255,255,255,.08)}
+
+/* HISTORIC BANNER on tabs */
+.hist-banner{background:#fffbeb;border:2px solid #fcd34d;border-radius:12px;padding:10px 20px;font-size:14px;font-weight:700;color:#92400e;margin-bottom:14px;display:none}
+.hist-banner.show{display:block}
 
 /* FOOTER */
 footer{display:flex;justify-content:space-between;padding:4px 6px}
@@ -135,12 +152,19 @@ footer{display:flex;justify-content:space-between;padding:4px 6px}
   <header>
     <div class="logo">intake<em>.</em>board</div>
     <div class="header-right">
-      <span id="mode-badge" class="live-pill"><span class="dot"></span> connecting</span>
+      <button id="btn-live" class="mode-btn active" onclick="setMode('live')">
+        <span class="btn-icon">🟢</span> Live — Today
+      </button>
+      <button id="btn-hist" class="mode-btn" onclick="setMode('historic')">
+        <span class="btn-icon">🗂️</span> Historic Data
+      </button>
+      <span id="mode-badge" class="live-pill" style="display:none"><span class="dot"></span> connecting</span>
       <div id="clock">—:—:—</div>
     </div>
   </header>
 
-  <div class="stats">
+  <!-- STATS (live only) -->
+  <div class="stats" id="stats-bar">
     <div class="stat-card sc-blue">
       <div class="stat-shimmer"></div>
       <div class="stat-label" id="s1-label">Total intakes</div>
@@ -167,12 +191,27 @@ footer{display:flex;justify-content:space-between;padding:4px 6px}
     </div>
   </div>
 
+  <!-- HISTORIC DATE PICKER -->
+  <div id="historic-bar">
+    <span class="date-label">From</span>
+    <input type="date" id="date-from" class="date-input">
+    <span class="date-sep">→</span>
+    <span class="date-label">To</span>
+    <input type="date" id="date-to" class="date-input">
+    <button class="fetch-hist-btn" id="hist-fetch-btn" onclick="fetchHistoric()">Show Data</button>
+    <span id="hist-loading">Loading…</span>
+    <span class="hist-range-label" id="hist-range-label"></span>
+  </div>
+
   <!-- TAB NAV -->
   <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('leaderboard')">🏆 Agent Leaderboard</button>
-    <button class="tab-btn" onclick="switchTab('firms')">🏢 Law Firm Breakdown</button>
-    <button class="tab-btn" onclick="switchTab('tort')">⚖️ SSD · SSI · ISA</button>
+    <button class="tab-btn active" id="tabn-leaderboard" onclick="switchTab('leaderboard',this)">🏆 Agent Leaderboard</button>
+    <button class="tab-btn" id="tabn-firms" onclick="switchTab('firms',this)">🏢 Law Firm Breakdown</button>
+    <button class="tab-btn" id="tabn-tort" onclick="switchTab('tort',this)">📊 Product Breakdown</button>
   </div>
+
+  <!-- HISTORIC BANNER (shown inside each tab when viewing historic) -->
+  <div class="hist-banner" id="hist-banner"></div>
 
   <!-- TAB 1: LEADERBOARD -->
   <div id="tab-leaderboard" class="tab-panel active">
@@ -192,15 +231,15 @@ footer{display:flex;justify-content:space-between;padding:4px 6px}
   <div id="tab-firms" class="tab-panel">
     <div class="table-container">
       <div class="tbl-top">
-        <div class="tbl-title">Law Firm Breakdown</div>
-        <div class="tbl-sub" id="firm-sub">Today · WTD · MTD per firm</div>
+        <div class="tbl-title" id="firm-title">Law Firm Breakdown</div>
+        <div class="tbl-sub" id="firm-sub">Loading…</div>
       </div>
       <table>
-        <thead>
+        <thead id="firm-head">
           <tr>
             <th class="c-rank">#</th>
             <th class="c-name">Law Firm</th>
-            <th class="c-int">Today</th>
+            <th class="c-int">Count</th>
             <th class="c-int">WTD</th>
             <th class="c-int">MTD</th>
           </tr>
@@ -210,68 +249,67 @@ footer{display:flex;justify-content:space-between;padding:4px 6px}
     </div>
   </div>
 
-  <!-- TAB 3: TORT TYPE BREAKDOWN -->
+  <!-- TAB 3: PRODUCT BREAKDOWN -->
   <div id="tab-tort" class="tab-panel">
     <div class="tort-grid">
       <div class="tort-card tc-ssd">
         <div class="tort-shimmer"></div>
-        <div class="tort-card-label">Intake type</div>
+        <div class="tort-card-label">Product</div>
         <div class="tort-card-type">SSD</div>
         <div class="tort-numbers">
           <div class="tort-num-block">
-            <div class="tort-num-label">Today</div>
+            <div class="tort-num-label" id="ssd-l1">Today</div>
             <div class="tort-num-val" id="ssd-today">—</div>
           </div>
           <div class="tort-num-block">
-            <div class="tort-num-label">WTD</div>
+            <div class="tort-num-label" id="ssd-l2">WTD</div>
             <div class="tort-num-val" id="ssd-wtd">—</div>
           </div>
           <div class="tort-num-block">
-            <div class="tort-num-label">MTD</div>
+            <div class="tort-num-label" id="ssd-l3">MTD</div>
             <div class="tort-num-val" id="ssd-mtd">—</div>
           </div>
         </div>
       </div>
       <div class="tort-card tc-ssi">
         <div class="tort-shimmer"></div>
-        <div class="tort-card-label">Intake type</div>
+        <div class="tort-card-label">Product</div>
         <div class="tort-card-type">SSI</div>
         <div class="tort-numbers">
           <div class="tort-num-block">
-            <div class="tort-num-label">Today</div>
+            <div class="tort-num-label" id="ssi-l1">Today</div>
             <div class="tort-num-val" id="ssi-today">—</div>
           </div>
           <div class="tort-num-block">
-            <div class="tort-num-label">WTD</div>
+            <div class="tort-num-label" id="ssi-l2">WTD</div>
             <div class="tort-num-val" id="ssi-wtd">—</div>
           </div>
           <div class="tort-num-block">
-            <div class="tort-num-label">MTD</div>
+            <div class="tort-num-label" id="ssi-l3">MTD</div>
             <div class="tort-num-val" id="ssi-mtd">—</div>
           </div>
         </div>
       </div>
       <div class="tort-card tc-isa">
         <div class="tort-shimmer"></div>
-        <div class="tort-card-label">Intake type</div>
+        <div class="tort-card-label">Product</div>
         <div class="tort-card-type">ISA</div>
         <div class="tort-numbers">
           <div class="tort-num-block">
-            <div class="tort-num-label">Today</div>
+            <div class="tort-num-label" id="isa-l1">Today</div>
             <div class="tort-num-val" id="isa-today">—</div>
           </div>
           <div class="tort-num-block">
-            <div class="tort-num-label">WTD</div>
+            <div class="tort-num-label" id="isa-l2">WTD</div>
             <div class="tort-num-val" id="isa-wtd">—</div>
           </div>
           <div class="tort-num-block">
-            <div class="tort-num-label">MTD</div>
+            <div class="tort-num-label" id="isa-l3">MTD</div>
             <div class="tort-num-val" id="isa-mtd">—</div>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 
   <footer>
@@ -318,120 +356,251 @@ var DISPLAY_SECS = 9;
 var ICONS = ["🎯","⚡","🔥","✨","💫","🚀","🏆","💥","🌟","👑"];
 
 var AGENT_COLORS = [
-  {bg:"#eff6ff",color:"#1d4ed8",border:"#93c5fd"},
-  {bg:"#f5f3ff",color:"#6d28d9",border:"#c4b5fd"},
-  {bg:"#ecfdf5",color:"#047857",border:"#6ee7b7"},
-  {bg:"#fffbeb",color:"#b45309",border:"#fcd34d"},
-  {bg:"#fff1f2",color:"#be123c",border:"#fda4af"},
-  {bg:"#f0fdfa",color:"#0f766e",border:"#5eead4"},
-  {bg:"#fdf4ff",color:"#9333ea",border:"#e879f9"},
-  {bg:"#fff7ed",color:"#c2410c",border:"#fdba74"},
-  {bg:"#f0fdf4",color:"#15803d",border:"#86efac"},
-  {bg:"#eef2ff",color:"#4338ca",border:"#a5b4fc"},
+  {bg:"#eff6ff",color:"#1d4ed8",border:"#93c5fd"},{bg:"#f5f3ff",color:"#6d28d9",border:"#c4b5fd"},
+  {bg:"#ecfdf5",color:"#047857",border:"#6ee7b7"},{bg:"#fffbeb",color:"#b45309",border:"#fcd34d"},
+  {bg:"#fff1f2",color:"#be123c",border:"#fda4af"},{bg:"#f0fdfa",color:"#0f766e",border:"#5eead4"},
+  {bg:"#fdf4ff",color:"#9333ea",border:"#e879f9"},{bg:"#fff7ed",color:"#c2410c",border:"#fdba74"},
+  {bg:"#f0fdf4",color:"#15803d",border:"#86efac"},{bg:"#eef2ff",color:"#4338ca",border:"#a5b4fc"},
 ];
-
 var CAMP_COLORS = [
-  {bg:"#eff6ff",color:"#1d4ed8",border:"#93c5fd"},
-  {bg:"#f5f3ff",color:"#6d28d9",border:"#c4b5fd"},
-  {bg:"#ecfdf5",color:"#047857",border:"#6ee7b7"},
-  {bg:"#fffbeb",color:"#b45309",border:"#fcd34d"},
-  {bg:"#fff1f2",color:"#be123c",border:"#fda4af"},
-  {bg:"#f0fdfa",color:"#0f766e",border:"#5eead4"},
+  {bg:"#eff6ff",color:"#1d4ed8",border:"#93c5fd"},{bg:"#f5f3ff",color:"#6d28d9",border:"#c4b5fd"},
+  {bg:"#ecfdf5",color:"#047857",border:"#6ee7b7"},{bg:"#fffbeb",color:"#b45309",border:"#fcd34d"},
+  {bg:"#fff1f2",color:"#be123c",border:"#fda4af"},{bg:"#f0fdfa",color:"#0f766e",border:"#5eead4"},
 ];
-
 var FIRM_COLORS = [
-  {bg:"#eff6ff",color:"#1d4ed8",border:"#93c5fd"},
-  {bg:"#f5f3ff",color:"#6d28d9",border:"#c4b5fd"},
-  {bg:"#ecfdf5",color:"#047857",border:"#6ee7b7"},
-  {bg:"#fffbeb",color:"#b45309",border:"#fcd34d"},
-  {bg:"#fff1f2",color:"#be123c",border:"#fda4af"},
-  {bg:"#f0fdfa",color:"#0f766e",border:"#5eead4"},
-  {bg:"#fdf4ff",color:"#9333ea",border:"#e879f9"},
-  {bg:"#fff7ed",color:"#c2410c",border:"#fdba74"},
-  {bg:"#f0fdf4",color:"#15803d",border:"#86efac"},
-  {bg:"#eef2ff",color:"#4338ca",border:"#a5b4fc"},
-  {bg:"#fefce8",color:"#854d0e",border:"#fde68a"},
-  {bg:"#fdf2f8",color:"#9d174d",border:"#f9a8d4"},
+  {bg:"#eff6ff",color:"#1d4ed8",border:"#93c5fd"},{bg:"#f5f3ff",color:"#6d28d9",border:"#c4b5fd"},
+  {bg:"#ecfdf5",color:"#047857",border:"#6ee7b7"},{bg:"#fffbeb",color:"#b45309",border:"#fcd34d"},
+  {bg:"#fff1f2",color:"#be123c",border:"#fda4af"},{bg:"#f0fdfa",color:"#0f766e",border:"#5eead4"},
+  {bg:"#fdf4ff",color:"#9333ea",border:"#e879f9"},{bg:"#fff7ed",color:"#c2410c",border:"#fdba74"},
+  {bg:"#f0fdf4",color:"#15803d",border:"#86efac"},{bg:"#eef2ff",color:"#4338ca",border:"#a5b4fc"},
+  {bg:"#fefce8",color:"#854d0e",border:"#fde68a"},{bg:"#fdf2f8",color:"#9d174d",border:"#f9a8d4"},
 ];
 
+var agentColors={},colorIdx=0,campColorMap={},campColorIdx=0,firmColorMap={},firmColorIdx=0;
+var knownRows=null,celQueue=[],celActive=false,celTimer=null,cdItv=null;
+var soundEnabled=false,actx=null;
+var currentMode='live'; // 'live' or 'historic'
 
-var agentColors = {}, colorIdx = 0;
-var campColorMap = {}, campColorIdx = 0;
-var firmColorMap = {}, firmColorIdx = 0;
-var knownRows = null;
-var celQueue = [], celActive = false, celTimer = null, cdItv = null;
-var soundEnabled = false, actx = null;
-var lastData = null;
+// ─── MODE TOGGLE ───────────────────────────────────────────────────────────
+function setMode(m) {
+  currentMode = m;
+  var btnLive = document.getElementById('btn-live');
+  var btnHist = document.getElementById('btn-hist');
+  var statsBar = document.getElementById('stats-bar');
+  var histBar  = document.getElementById('historic-bar');
+  var banner   = document.getElementById('hist-banner');
+
+  if (m === 'live') {
+    btnLive.classList.add('active'); btnHist.classList.remove('active');
+    statsBar.style.display = 'grid'; histBar.classList.remove('show');
+    banner.classList.remove('show');
+    // Restore live column headers
+    setTortLabels('Today','WTD','MTD');
+    // Restore live firm header
+    document.getElementById('firm-head').innerHTML =
+      '<tr><th class="c-rank">#</th><th class="c-name">Law Firm</th>'+
+      '<th class="c-int">Today</th><th class="c-int">WTD</th><th class="c-int">MTD</th></tr>';
+    fetchData();
+  } else {
+    btnHist.classList.add('active'); btnLive.classList.remove('active');
+    statsBar.style.display = 'none'; histBar.classList.add('show');
+    // Set default dates: last 30 days
+    var today = new Date();
+    var from  = new Date(); from.setDate(today.getDate() - 30);
+    document.getElementById('date-to').value   = fmtInputDate(today);
+    document.getElementById('date-from').value = fmtInputDate(from);
+    clearLiveTables();
+  }
+}
+
+function fmtInputDate(d) {
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function clearLiveTables() {
+  document.getElementById('table-body').innerHTML = '<tr><td colspan="7"><div class="empty">Select a date range and click Show Data</div></td></tr>';
+  document.getElementById('table-head').innerHTML = '';
+  document.getElementById('firm-body').innerHTML  = '<tr><td colspan="5"><div class="empty">Select a date range and click Show Data</div></td></tr>';
+  ['ssd','ssi','isa'].forEach(function(t){
+    document.getElementById(t+'-today').textContent='—';
+    document.getElementById(t+'-wtd').textContent='—';
+    document.getElementById(t+'-mtd').textContent='—';
+  });
+}
+
+function setTortLabels(l1,l2,l3) {
+  ['ssd','ssi','isa'].forEach(function(t){
+    document.getElementById(t+'-l1').textContent=l1;
+    document.getElementById(t+'-l2').textContent=l2;
+    document.getElementById(t+'-l3').textContent=l3;
+  });
+}
+
+// ─── HISTORIC FETCH ────────────────────────────────────────────────────────
+function fetchHistoric() {
+  var from = document.getElementById('date-from').value;
+  var to   = document.getElementById('date-to').value;
+  if (!from || !to) { alert('Please select both From and To dates.'); return; }
+  if (from > to)    { alert('From date must be before To date.'); return; }
+
+  var btn  = document.getElementById('hist-fetch-btn');
+  var load = document.getElementById('hist-loading');
+  btn.disabled = true; load.style.display = 'inline';
+
+  var url = SCRIPT_URL + '?mode=historic&from=' + encodeURIComponent(from) + '&to=' + encodeURIComponent(to);
+  fetch(url)
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      btn.disabled = false; load.style.display = 'none';
+      renderHistoric(data, from, to);
+    })
+    .catch(function(){
+      btn.disabled = false; load.style.display = 'none';
+      alert('Failed to fetch historic data. Please try again.');
+    });
+}
+
+function renderHistoric(data, from, to) {
+  var label = formatDisplayDate(from) + ' → ' + formatDisplayDate(to);
+  document.getElementById('hist-range-label').textContent = label;
+
+  var banner = document.getElementById('hist-banner');
+  banner.textContent = '📅 Showing historic data: ' + label;
+  banner.classList.add('show');
+
+  var rows = data.historicRows || [];
+
+  // ── Leaderboard tab ──
+  var agentCount = {}, lastCamp = {};
+  rows.forEach(function(r){
+    agentCount[r.agent] = (agentCount[r.agent]||0)+1;
+    lastCamp[r.agent] = r.campaign;
+  });
+  var agents = Object.keys(agentCount).sort(function(a,b){ return agentCount[b]-agentCount[a]; });
+  var total  = rows.length, top = agents[0];
+
+  document.getElementById('tbl-title').textContent = 'Agent Leaderboard';
+  document.getElementById('tbl-sub').textContent   = total + ' intake' + (total!==1?'s':'') + ' · ' + label;
+
+  document.getElementById('table-head').innerHTML =
+    '<tr><th class="c-rank">#</th><th>Agent</th>'+
+    '<th class="c-int">Intakes</th><th class="c-camp">Campaign</th></tr>';
+
+  if (!agents.length) {
+    document.getElementById('table-body').innerHTML = '<tr><td colspan="4"><div class="empty">No intakes in this date range</div></td></tr>';
+  } else {
+    document.getElementById('table-body').innerHTML = agents.map(function(agent,i){
+      var c = getAgentColor(agent);
+      var camp = lastCamp[agent]||'—'; var cc = getCampColor(camp);
+      return '<tr>'+
+        '<td class="rank-cell">'+rankIcon(i)+'</td>'+
+        '<td><div class="agent-row"><div class="av" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+initials(agent)+'</div>'+
+        '<span class="agent-name">'+agent+'</span></div></td>'+
+        '<td style="text-align:center"><span class="int-badge" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+agentCount[agent]+'</span></td>'+
+        '<td><span class="camp-tag" style="background:'+cc.bg+';color:'+cc.color+';border-color:'+cc.border+'">'+camp+'</span></td>'+
+        '</tr>';
+    }).join('');
+  }
+
+  // ── Law firm tab ──
+  var firmCount = {};
+  rows.forEach(function(r){ if(r.firm) firmCount[r.firm]=(firmCount[r.firm]||0)+1; });
+  var firms = Object.keys(firmCount).sort(function(a,b){ return firmCount[b]-firmCount[a]; });
+
+  document.getElementById('firm-title').textContent = 'Law Firm Breakdown';
+  document.getElementById('firm-sub').textContent   = label;
+  document.getElementById('firm-head').innerHTML =
+    '<tr><th class="c-rank">#</th><th class="c-name">Law Firm</th><th class="c-int">Intakes</th></tr>';
+
+  if (!firms.length) {
+    document.getElementById('firm-body').innerHTML = '<tr><td colspan="3"><div class="empty">No firm data in this date range</div></td></tr>';
+  } else {
+    document.getElementById('firm-body').innerHTML = firms.map(function(firm,i){
+      var fc = getFirmColor(firm);
+      return '<tr>'+
+        '<td class="rank-cell">'+rankIcon(i)+'</td>'+
+        '<td><div class="agent-row">'+
+          '<div class="av" style="background:'+fc.bg+';color:'+fc.color+';border-color:'+fc.border+';font-size:14px">'+firmInitials(firm)+'</div>'+
+          '<span class="firm-name">'+firm+'</span>'+
+        '</div></td>'+
+        '<td style="text-align:center"><span class="int-badge" style="background:'+fc.bg+';color:'+fc.color+';border-color:'+fc.border+'">'+firmCount[firm]+'</span></td>'+
+        '</tr>';
+    }).join('');
+  }
+
+  // ── Product breakdown tab ──
+  var tortCount = {SSD:0, SSI:0, ISA:0};
+  rows.forEach(function(r){
+    var t = String(r.tort||'').trim().toUpperCase();
+    if (tortCount[t] !== undefined) tortCount[t]++;
+  });
+  setTortLabels('Range','','');
+  // For historic, just show the range count in the first slot and hide WTD/MTD
+  document.getElementById('ssd-today').textContent = tortCount.SSD;
+  document.getElementById('ssd-wtd').textContent   = '—';
+  document.getElementById('ssd-mtd').textContent   = '—';
+  document.getElementById('ssi-today').textContent = tortCount.SSI;
+  document.getElementById('ssi-wtd').textContent   = '—';
+  document.getElementById('ssi-mtd').textContent   = '—';
+  document.getElementById('isa-today').textContent = tortCount.ISA;
+  document.getElementById('isa-wtd').textContent   = '—';
+  document.getElementById('isa-mtd').textContent   = '—';
+  setTortLabels('Total','—','—');
+  // Clean up — just show one number per card with label "Total in range"
+  ['ssd','ssi','isa'].forEach(function(t){
+    document.getElementById(t+'-l1').textContent='Total in range';
+    document.getElementById(t+'-l2').textContent='';
+    document.getElementById(t+'-l3').textContent='';
+    document.getElementById(t+'-wtd').textContent='';
+    document.getElementById(t+'-mtd').textContent='';
+  });
+}
+
+function formatDisplayDate(str) {
+  var parts = str.split('-');
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[parseInt(parts[1])-1]+' '+parseInt(parts[2])+', '+parts[0];
+}
 
 // ─── TAB SWITCHING ─────────────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-  document.getElementById('tab-' + name).classList.add('active');
-  event.currentTarget.classList.add('active');
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('tab-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
 }
 
 // ─── CONFETTI ──────────────────────────────────────────────────────────────
-var cvs = document.getElementById('confetti-canvas');
-var cx  = cvs.getContext('2d');
-var pieces = [], confGoing = false;
-function resizeCanvas() { cvs.width = window.innerWidth; cvs.height = window.innerHeight; }
-resizeCanvas(); window.addEventListener('resize', resizeCanvas);
-
-function burst() {
-  var cols = ["#1d4ed8","#6d28d9","#047857","#b45309","#be123c","#0f766e","#9333ea","#c2410c","#fbbf24","#4338ca"];
-  for (var i = 0; i < 180; i++) {
-    pieces.push({
-      x: window.innerWidth/2+(Math.random()-.5)*320, y: window.innerHeight*.35,
-      vx:(Math.random()-.5)*18, vy:-(Math.random()*14+6),
-      size:Math.random()*9+4, color:cols[Math.floor(Math.random()*cols.length)],
-      rot:Math.random()*360, rotV:(Math.random()-.5)*10,
-      shape:Math.random()<.5?'rect':'circle', life:1, decay:Math.random()*.009+.006
-    });
-  }
-  if (!confGoing) { confGoing = true; requestAnimationFrame(drawConf); }
+var cvs=document.getElementById('confetti-canvas'),cx=cvs.getContext('2d');
+var pieces=[],confGoing=false;
+function resizeCanvas(){cvs.width=window.innerWidth;cvs.height=window.innerHeight;}
+resizeCanvas(); window.addEventListener('resize',resizeCanvas);
+function burst(){
+  var cols=["#1d4ed8","#6d28d9","#047857","#b45309","#be123c","#0f766e","#9333ea","#c2410c","#fbbf24","#4338ca"];
+  for(var i=0;i<180;i++){pieces.push({x:window.innerWidth/2+(Math.random()-.5)*320,y:window.innerHeight*.35,vx:(Math.random()-.5)*18,vy:-(Math.random()*14+6),size:Math.random()*9+4,color:cols[Math.floor(Math.random()*cols.length)],rot:Math.random()*360,rotV:(Math.random()-.5)*10,shape:Math.random()<.5?'rect':'circle',life:1,decay:Math.random()*.009+.006});}
+  if(!confGoing){confGoing=true;requestAnimationFrame(drawConf);}
 }
-function drawConf() {
+function drawConf(){
   cx.clearRect(0,0,cvs.width,cvs.height);
-  pieces = pieces.filter(function(p){return p.life>0;});
-  pieces.forEach(function(p){
-    p.x+=p.vx; p.y+=p.vy; p.vy+=.4; p.vx*=.982; p.rot+=p.rotV; p.life-=p.decay;
-    cx.save(); cx.globalAlpha=p.life; cx.fillStyle=p.color;
-    cx.translate(p.x,p.y); cx.rotate(p.rot*Math.PI/180);
-    if(p.shape==='rect'){cx.fillRect(-p.size/2,-p.size*.38,p.size,p.size*.76);}
-    else{cx.beginPath();cx.arc(0,0,p.size/2.4,0,Math.PI*2);cx.fill();}
-    cx.restore();
-  });
-  if(pieces.length>0){requestAnimationFrame(drawConf);}
-  else{confGoing=false;cx.clearRect(0,0,cvs.width,cvs.height);}
+  pieces=pieces.filter(function(p){return p.life>0;});
+  pieces.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.4;p.vx*=.982;p.rot+=p.rotV;p.life-=p.decay;cx.save();cx.globalAlpha=p.life;cx.fillStyle=p.color;cx.translate(p.x,p.y);cx.rotate(p.rot*Math.PI/180);if(p.shape==='rect'){cx.fillRect(-p.size/2,-p.size*.38,p.size,p.size*.76);}else{cx.beginPath();cx.arc(0,0,p.size/2.4,0,Math.PI*2);cx.fill();}cx.restore();});
+  if(pieces.length>0){requestAnimationFrame(drawConf);}else{confGoing=false;cx.clearRect(0,0,cvs.width,cvs.height);}
 }
 
 // ─── AUDIO ─────────────────────────────────────────────────────────────────
-function enableSound() {
-  if (soundEnabled) return;
-  try {
-    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
-    if (actx.state === 'suspended') actx.resume();
-    soundEnabled = true;
-    document.getElementById('snd-banner').classList.add('hide');
-  } catch(e) {}
+function enableSound(){
+  if(soundEnabled)return;
+  try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();soundEnabled=true;document.getElementById('snd-banner').classList.add('hide');}catch(e){}
 }
-function playChime() {
-  if (!soundEnabled || !actx) return;
-  var c = actx; if (c.state==='suspended') c.resume();
-  var t = c.currentTime, VOL = 0.16;
+function playChime(){
+  if(!soundEnabled||!actx)return;
+  var c=actx;if(c.state==='suspended')c.resume();
+  var t=c.currentTime,VOL=0.16;
   [523.25,659.25,783.99,1046.50].forEach(function(freq,i){
-    var d=i*0.13;
-    var osc=c.createOscillator(),g=c.createGain();
-    osc.type='sine'; osc.frequency.setValueAtTime(freq,t+d);
-    g.gain.setValueAtTime(0,t+d); g.gain.linearRampToValueAtTime(VOL,t+d+0.04);
-    g.gain.exponentialRampToValueAtTime(0.001,t+d+1.8);
-    osc.connect(g); g.connect(c.destination); osc.start(t+d); osc.stop(t+d+2);
-    var o2=c.createOscillator(),g2=c.createGain();
-    o2.type='sine'; o2.frequency.setValueAtTime(freq*2,t+d);
-    g2.gain.setValueAtTime(0,t+d); g2.gain.linearRampToValueAtTime(VOL*.2,t+d+.02);
-    g2.gain.exponentialRampToValueAtTime(0.001,t+d+.7);
-    o2.connect(g2); g2.connect(c.destination); o2.start(t+d); o2.stop(t+d+1);
+    var d=i*0.13;var osc=c.createOscillator(),g=c.createGain();
+    osc.type='sine';osc.frequency.setValueAtTime(freq,t+d);g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(VOL,t+d+0.04);g.gain.exponentialRampToValueAtTime(0.001,t+d+1.8);
+    osc.connect(g);g.connect(c.destination);osc.start(t+d);osc.stop(t+d+2);
+    var o2=c.createOscillator(),g2=c.createGain();o2.type='sine';o2.frequency.setValueAtTime(freq*2,t+d);g2.gain.setValueAtTime(0,t+d);g2.gain.linearRampToValueAtTime(VOL*.2,t+d+.02);g2.gain.exponentialRampToValueAtTime(0.001,t+d+.7);o2.connect(g2);g2.connect(c.destination);o2.start(t+d);o2.stop(t+d+1);
   });
 }
 
@@ -441,26 +610,13 @@ function getCampColor(c){if(!campColorMap[c])campColorMap[c]=CAMP_COLORS[campCol
 function getFirmColor(f){if(!firmColorMap[f])firmColorMap[f]=FIRM_COLORS[firmColorIdx++%FIRM_COLORS.length];return firmColorMap[f];}
 function initials(n){return n.split(' ').map(function(w){return w[0];}).slice(0,2).join('').toUpperCase();}
 function firmInitials(n){return n.substring(0,2).toUpperCase();}
-function rankIcon(i){
-  if(i===0)return'<span class="medal">🥇</span>';
-  if(i===1)return'<span class="medal">🥈</span>';
-  if(i===2)return'<span class="medal">🥉</span>';
-  return'<span class="rank-num">'+(i+1)+'</span>';
-}
-function tickClock(){
-  document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'America/Los_Angeles'});
-}
-setInterval(tickClock,1000); tickClock();
+function rankIcon(i){if(i===0)return'<span class="medal">🥇</span>';if(i===1)return'<span class="medal">🥈</span>';if(i===2)return'<span class="medal">🥉</span>';return'<span class="rank-num">'+(i+1)+'</span>';}
+function tickClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'America/Los_Angeles'});}
+setInterval(tickClock,1000);tickClock();
 
 // ─── CELEBRATION ───────────────────────────────────────────────────────────
-function queueCelebration(row,today,wtd,mtd){
-  celQueue.push({row:row,today:today,wtd:wtd,mtd:mtd});
-  if(!celActive)nextCelebration();
-}
-function nextCelebration(){
-  if(!celQueue.length){celActive=false;hideCelebration();return;}
-  celActive=true; showCelebration(celQueue.shift());
-}
+function queueCelebration(row,today,wtd,mtd){celQueue.push({row:row,today:today,wtd:wtd,mtd:mtd});if(!celActive)nextCelebration();}
+function nextCelebration(){if(!celQueue.length){celActive=false;hideCelebration();return;}celActive=true;showCelebration(celQueue.shift());}
 function showCelebration(item){
   var r=item.row;
   document.getElementById('cel-name').textContent=r.agent;
@@ -472,45 +628,32 @@ function showCelebration(item){
   document.getElementById('cel-camp').textContent=r.campaign||'';
   document.getElementById('cel-time').textContent=(r.time||'')+' PST';
   document.getElementById('cel-icon').textContent=ICONS[Math.floor(Math.random()*ICONS.length)];
-  var card=document.getElementById('cel-card');
-  card.style.animation='none'; card.offsetHeight; card.style.animation='popIn .5s cubic-bezier(.34,1.56,.64,1)';
-  document.getElementById('cel-overlay').classList.add('on');
-  burst(); playChime();
-  var prog=document.getElementById('cel-prog');
-  prog.style.transition='none'; prog.style.width='100%'; prog.offsetHeight;
-  prog.style.transition='width '+DISPLAY_SECS+'s linear'; prog.style.width='0%';
-  var rem=DISPLAY_SECS;
-  document.getElementById('cel-cd').textContent=rem+'s';
-  clearInterval(cdItv);
-  cdItv=setInterval(function(){rem--;document.getElementById('cel-cd').textContent=rem+'s';if(rem<=0)clearInterval(cdItv);},1000);
-  clearTimeout(celTimer); celTimer=setTimeout(nextCelebration,DISPLAY_SECS*1000);
+  var card=document.getElementById('cel-card');card.style.animation='none';card.offsetHeight;card.style.animation='popIn .5s cubic-bezier(.34,1.56,.64,1)';
+  document.getElementById('cel-overlay').classList.add('on');burst();playChime();
+  var prog=document.getElementById('cel-prog');prog.style.transition='none';prog.style.width='100%';prog.offsetHeight;prog.style.transition='width '+DISPLAY_SECS+'s linear';prog.style.width='0%';
+  var rem=DISPLAY_SECS;document.getElementById('cel-cd').textContent=rem+'s';
+  clearInterval(cdItv);cdItv=setInterval(function(){rem--;document.getElementById('cel-cd').textContent=rem+'s';if(rem<=0)clearInterval(cdItv);},1000);
+  clearTimeout(celTimer);celTimer=setTimeout(nextCelebration,DISPLAY_SECS*1000);
 }
 function hideCelebration(){document.getElementById('cel-overlay').classList.remove('on');}
 document.getElementById('cel-overlay').addEventListener('click',function(){clearTimeout(celTimer);clearInterval(cdItv);nextCelebration();});
 
-// ─── DATA FETCH ────────────────────────────────────────────────────────────
+// ─── LIVE DATA FETCH ───────────────────────────────────────────────────────
 function fetchData(){
+  if(currentMode!=='live')return;
   fetch(SCRIPT_URL).then(function(r){return r.json();}).then(render).catch(renderError);
 }
 
-// ─── RENDER ────────────────────────────────────────────────────────────────
 function render(data){
-  lastData = data;
   document.getElementById('last-updated').textContent='Updated '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'America/Los_Angeles'});
-  document.getElementById('mode-badge').innerHTML='<span class="dot"></span> Live — today';
   processLiveRows(data.liveRows||[], data.agentTotals||{}, data.firmTotals||{}, data.tortTotals||{});
 }
 
-// ─── PROCESS LIVE ROWS ─────────────────────────────────────────────────────
 function processLiveRows(rows, agentTotals, firmTotals, tortTotals){
   if(knownRows!==null && rows.length>knownRows.length){
     var newOnes=rows.slice(knownRows.length);
-    var agentToday={};
-    rows.forEach(function(r){agentToday[r.agent]=(agentToday[r.agent]||0)+1;});
-    newOnes.forEach(function(row){
-      var t=agentTotals[row.agent]||{wtd:0,mtd:0};
-      queueCelebration(row,agentToday[row.agent]||1,t.wtd,t.mtd);
-    });
+    var agentToday={};rows.forEach(function(r){agentToday[r.agent]=(agentToday[r.agent]||0)+1;});
+    newOnes.forEach(function(row){var t=agentTotals[row.agent]||{wtd:0,mtd:0};queueCelebration(row,agentToday[row.agent]||1,t.wtd,t.mtd);});
   }
   knownRows=rows;
   renderLeaderboard(rows, agentTotals);
@@ -521,123 +664,70 @@ function processLiveRows(rows, agentTotals, firmTotals, tortTotals){
 // ─── TAB 1: LEADERBOARD ────────────────────────────────────────────────────
 function renderLeaderboard(rows, agentTotals){
   var todayCount={},lastTime={},lastCamp={};
-  rows.forEach(function(r){
-    todayCount[r.agent]=(todayCount[r.agent]||0)+1;
-    lastTime[r.agent]=r.time; lastCamp[r.agent]=r.campaign;
-  });
+  rows.forEach(function(r){todayCount[r.agent]=(todayCount[r.agent]||0)+1;lastTime[r.agent]=r.time;lastCamp[r.agent]=r.campaign;});
   var agents=Object.keys(todayCount).sort(function(a,b){return todayCount[b]-todayCount[a];});
-  var total=rows.length, top=agents[0];
-
+  var total=rows.length,top=agents[0];
   document.getElementById('s1-val').textContent=total;
   document.getElementById('s1-sub').textContent=agents.length+' agent'+(agents.length!==1?'s':'')+' active';
   document.getElementById('s2-val').textContent=top?top.split(' ')[0]:'—';
   document.getElementById('s2-sub').textContent=top?todayCount[top]+' intake'+(todayCount[top]!==1?'s':''):'';
   document.getElementById('s3-val').textContent=agents.length;
   document.getElementById('s3-sub').textContent='performing today';
+  document.getElementById('tbl-title').textContent='Live leaderboard';
   document.getElementById('tbl-sub').textContent=total+' intake'+(total!==1?'s':'')+' recorded today';
-
-  document.getElementById('table-head').innerHTML=
-    '<tr><th class="c-rank">#</th><th>Agent</th>'+
-    '<th class="c-int">Today</th><th class="c-int">WTD</th><th class="c-int">MTD</th>'+
-    '<th class="c-camp">Campaign</th><th class="c-time">Last at</th></tr>';
-
-  if(!agents.length){
-    document.getElementById('table-body').innerHTML='<tr><td colspan="7"><div class="empty">No intakes yet — waiting for first entry</div></td></tr>';
-    return;
-  }
+  document.getElementById('table-head').innerHTML='<tr><th class="c-rank">#</th><th>Agent</th><th class="c-int">Today</th><th class="c-int">WTD</th><th class="c-int">MTD</th><th class="c-camp">Campaign</th><th class="c-time">Last at</th></tr>';
+  if(!agents.length){document.getElementById('table-body').innerHTML='<tr><td colspan="7"><div class="empty">No intakes yet — waiting for first entry</div></td></tr>';return;}
   var wtdC={bg:"#f5f3ff",color:"#6d28d9",border:"#c4b5fd"};
   var mtdC={bg:"#ecfdf5",color:"#047857",border:"#6ee7b7"};
-
   document.getElementById('table-body').innerHTML=agents.map(function(agent,i){
-    var c=getAgentColor(agent);
-    var camp=lastCamp[agent]||'—'; var cc=getCampColor(camp);
-    var t=agentTotals[agent]||{wtd:0,mtd:0};
-    return'<tr>'+
-      '<td class="rank-cell">'+rankIcon(i)+'</td>'+
-      '<td><div class="agent-row"><div class="av" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+initials(agent)+'</div>'+
-      '<span class="agent-name">'+agent+'</span></div></td>'+
+    var c=getAgentColor(agent);var camp=lastCamp[agent]||'—';var cc=getCampColor(camp);var t=agentTotals[agent]||{wtd:0,mtd:0};
+    return'<tr><td class="rank-cell">'+rankIcon(i)+'</td>'+
+      '<td><div class="agent-row"><div class="av" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+initials(agent)+'</div><span class="agent-name">'+agent+'</span></div></td>'+
       '<td style="text-align:center"><span class="int-badge" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+todayCount[agent]+'</span></td>'+
       '<td style="text-align:center"><span class="int-badge" style="background:'+wtdC.bg+';color:'+wtdC.color+';border-color:'+wtdC.border+'">'+t.wtd+'</span></td>'+
       '<td style="text-align:center"><span class="int-badge" style="background:'+mtdC.bg+';color:'+mtdC.color+';border-color:'+mtdC.border+'">'+t.mtd+'</span></td>'+
       '<td><span class="camp-tag" style="background:'+cc.bg+';color:'+cc.color+';border-color:'+cc.border+'">'+camp+'</span></td>'+
-      '<td class="time-val">'+(lastTime[agent]||'')+'</td>'+
-      '</tr>';
+      '<td class="time-val">'+(lastTime[agent]||'')+'</td></tr>';
   }).join('');
 }
 
 // ─── TAB 2: LAW FIRM BREAKDOWN ─────────────────────────────────────────────
 function renderFirms(firmTotals, liveRows){
-  // Today count from live rows
   var todayFirm={};
-  liveRows.forEach(function(r){ todayFirm[r.firm]=(todayFirm[r.firm]||0)+1; });
-
-  // Merge with WTD/MTD from firmTotals
+  liveRows.forEach(function(r){todayFirm[r.firm]=(todayFirm[r.firm]||0)+1;});
   var allFirms={};
-  Object.keys(todayFirm).forEach(function(f){
-    if(!allFirms[f]) allFirms[f]={today:0,wtd:0,mtd:0};
-    allFirms[f].today=todayFirm[f];
-  });
-  Object.keys(firmTotals).forEach(function(f){
-    if(!allFirms[f]) allFirms[f]={today:0,wtd:0,mtd:0};
-    allFirms[f].wtd=firmTotals[f].wtd||0;
-    allFirms[f].mtd=firmTotals[f].mtd||0;
-  });
-
+  Object.keys(todayFirm).forEach(function(f){if(!allFirms[f])allFirms[f]={today:0,wtd:0,mtd:0};allFirms[f].today=todayFirm[f];});
+  Object.keys(firmTotals).forEach(function(f){if(!allFirms[f])allFirms[f]={today:0,wtd:0,mtd:0};allFirms[f].wtd=firmTotals[f].wtd||0;allFirms[f].mtd=firmTotals[f].mtd||0;});
   var firms=Object.keys(allFirms).sort(function(a,b){return allFirms[b].today-allFirms[a].today||allFirms[b].mtd-allFirms[a].mtd;});
-
-  if(!firms.length){
-    document.getElementById('firm-body').innerHTML='<tr><td colspan="5"><div class="empty">No firm data yet</div></td></tr>';
-    return;
-  }
+  document.getElementById('firm-title').textContent='Law Firm Breakdown';
+  document.getElementById('firm-sub').textContent='Today · WTD · MTD per firm';
+  document.getElementById('firm-head').innerHTML='<tr><th class="c-rank">#</th><th class="c-name">Law Firm</th><th class="c-int">Today</th><th class="c-int">WTD</th><th class="c-int">MTD</th></tr>';
+  if(!firms.length){document.getElementById('firm-body').innerHTML='<tr><td colspan="5"><div class="empty">No firm data yet</div></td></tr>';return;}
   var wtdC={bg:"#f5f3ff",color:"#6d28d9",border:"#c4b5fd"};
   var mtdC={bg:"#ecfdf5",color:"#047857",border:"#6ee7b7"};
-
   document.getElementById('firm-body').innerHTML=firms.map(function(firm,i){
-    var d=allFirms[firm];
-    var fc=getFirmColor(firm);
-    return'<tr>'+
-      '<td class="rank-cell">'+rankIcon(i)+'</td>'+
-      '<td><div class="agent-row">'+
-        '<div class="av" style="background:'+fc.bg+';color:'+fc.color+';border-color:'+fc.border+';font-size:14px">'+firmInitials(firm)+'</div>'+
-        '<span class="firm-name">'+firm+'</span>'+
-      '</div></td>'+
+    var d=allFirms[firm];var fc=getFirmColor(firm);
+    return'<tr><td class="rank-cell">'+rankIcon(i)+'</td>'+
+      '<td><div class="agent-row"><div class="av" style="background:'+fc.bg+';color:'+fc.color+';border-color:'+fc.border+';font-size:14px">'+firmInitials(firm)+'</div><span class="firm-name">'+firm+'</span></div></td>'+
       '<td style="text-align:center"><span class="int-badge" style="background:'+fc.bg+';color:'+fc.color+';border-color:'+fc.border+'">'+d.today+'</span></td>'+
       '<td style="text-align:center"><span class="int-badge" style="background:'+wtdC.bg+';color:'+wtdC.color+';border-color:'+wtdC.border+'">'+d.wtd+'</span></td>'+
-      '<td style="text-align:center"><span class="int-badge" style="background:'+mtdC.bg+';color:'+mtdC.color+';border-color:'+mtdC.border+'">'+d.mtd+'</span></td>'+
-      '</tr>';
+      '<td style="text-align:center"><span class="int-badge" style="background:'+mtdC.bg+';color:'+mtdC.color+';border-color:'+mtdC.border+'">'+d.mtd+'</span></td></tr>';
   }).join('');
 }
 
-// ─── TAB 3: TORT TYPE BREAKDOWN ────────────────────────────────────────────
+// ─── TAB 3: PRODUCT BREAKDOWN ──────────────────────────────────────────────
 function renderTort(tortTotals, liveRows){
-  // Today counts from live rows by tort
   var todayTort={SSD:0,SSI:0,ISA:0};
-  liveRows.forEach(function(r){
-    var tort=String(r.tort||'').trim().toUpperCase();
-    if(tort==='SSD') todayTort.SSD++;
-    else if(tort==='SSI') todayTort.SSI++;
-    else if(tort==='ISA') todayTort.ISA++;
-  });
-
-  // WTD / MTD from Apps Script
-  var ssd=tortTotals.SSD||{wtd:0,mtd:0};
-  var ssi=tortTotals.SSI||{wtd:0,mtd:0};
-  var isa=tortTotals.ISA||{wtd:0,mtd:0};
-
-  document.getElementById('ssd-today').textContent=todayTort.SSD;
-  document.getElementById('ssd-wtd').textContent=ssd.wtd;
-  document.getElementById('ssd-mtd').textContent=ssd.mtd;
-  document.getElementById('ssi-today').textContent=todayTort.SSI;
-  document.getElementById('ssi-wtd').textContent=ssi.wtd;
-  document.getElementById('ssi-mtd').textContent=ssi.mtd;
-  document.getElementById('isa-today').textContent=todayTort.ISA;
-  document.getElementById('isa-wtd').textContent=isa.wtd;
-  document.getElementById('isa-mtd').textContent=isa.mtd;
+  liveRows.forEach(function(r){var tort=String(r.tort||'').trim().toUpperCase();if(tort==='SSD')todayTort.SSD++;else if(tort==='SSI')todayTort.SSI++;else if(tort==='ISA')todayTort.ISA++;});
+  var ssd=tortTotals.SSD||{wtd:0,mtd:0};var ssi=tortTotals.SSI||{wtd:0,mtd:0};var isa=tortTotals.ISA||{wtd:0,mtd:0};
+  setTortLabels('Today','WTD','MTD');
+  document.getElementById('ssd-today').textContent=todayTort.SSD;document.getElementById('ssd-wtd').textContent=ssd.wtd;document.getElementById('ssd-mtd').textContent=ssd.mtd;
+  document.getElementById('ssi-today').textContent=todayTort.SSI;document.getElementById('ssi-wtd').textContent=ssi.wtd;document.getElementById('ssi-mtd').textContent=ssi.mtd;
+  document.getElementById('isa-today').textContent=todayTort.ISA;document.getElementById('isa-wtd').textContent=isa.wtd;document.getElementById('isa-mtd').textContent=isa.mtd;
 }
 
 // ─── ERROR STATE ───────────────────────────────────────────────────────────
 function renderError(){
-  document.getElementById('mode-badge').innerHTML='<span class="dot"></span> reconnecting…';
   document.getElementById('last-updated').textContent='Connection error — retrying';
 }
 
