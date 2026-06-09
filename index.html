@@ -483,26 +483,43 @@ function renderHistoric(data,from,to){
   var rows=data.historicRows||[];
   histSnapshot.rows=rows;
 
+
+
   // Agent leaderboard
-  var agentCount={},agentFirms={};
+  var agentCount={}, agentTortHist={};
   rows.forEach(function(r){
     agentCount[r.agent]=(agentCount[r.agent]||0)+1;
-    if(!agentFirms[r.agent])agentFirms[r.agent]={};
-    if(r.firm)agentFirms[r.agent][r.firm]=(agentFirms[r.agent][r.firm]||0)+1;
+    if(!agentTortHist[r.agent])agentTortHist[r.agent]={SSD:0,SSI:0,ISA:0,TTW:0};
+    var t=String(r.tort||'').trim().toUpperCase();
+    if(agentTortHist[r.agent][t]!==undefined)agentTortHist[r.agent][t]++;
   });
   var agents=Object.keys(agentCount).sort(function(a,b){return agentCount[b]-agentCount[a];});
   document.getElementById('tbl-title').textContent='Agent Leaderboard';
   document.getElementById('tbl-sub').textContent=rows.length+' intake'+(rows.length!==1?'s':'')+' · '+label;
-  document.getElementById('table-head').innerHTML='<tr><th style="width:60px;text-align:center">#</th><th>Agent</th><th class="tc" style="width:130px">Intakes</th></tr>';
+  document.getElementById('table-head').innerHTML=
+    '<tr>'+
+    '<th style="width:54px;text-align:center">#</th>'+
+    '<th>Agent</th>'+
+    '<th class="tc" style="width:110px">Intakes</th>'+
+    '<th class="tc" style="width:290px">SSD · SSI · ISA · TTW</th>'+
+    '</tr>';
   if(!agents.length){
-    document.getElementById('table-body').innerHTML='<tr><td colspan="3"><div class="empty">No intakes in this range</div></td></tr>';
+    document.getElementById('table-body').innerHTML='<tr><td colspan="4"><div class="empty">No intakes in this range</div></td></tr>';
   } else {
     document.getElementById('table-body').innerHTML=agents.map(function(agent,i){
       var c=getAgentColor(agent);
+      var td=agentTortHist[agent]||{SSD:0,SSI:0,ISA:0,TTW:0};
+      var esc=agent.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+      var tortBadges=
+        '<span class="tort-badge tb-ssd" onclick="showTortPopupHist(event,\''+esc+'\',\'SSD\','+td.SSD+')"><span class="tb-label">SSD</span>'+td.SSD+'</span>'+
+        '<span class="tort-badge tb-ssi" onclick="showTortPopupHist(event,\''+esc+'\',\'SSI\','+td.SSI+')"><span class="tb-label">SSI</span>'+td.SSI+'</span>'+
+        '<span class="tort-badge tb-isa" onclick="showTortPopupHist(event,\''+esc+'\',\'ISA\','+td.ISA+')"><span class="tb-label">ISA</span>'+td.ISA+'</span>'+
+        '<span class="tort-badge tb-ttw" onclick="showTortPopupHist(event,\''+esc+'\',\'TTW\','+td.TTW+')"><span class="tb-label">TTW</span>'+td.TTW+'</span>';
       return'<tr><td class="rank-cell">'+rankIcon(i)+'</td>'+
         '<td><div class="agent-row"><div class="av" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+initials(agent)+'</div>'+
-        '<span class="agent-name" onclick="showDrill(\''+agent.replace(/'/g,"\\'")+'\')">'+ agent+'</span></div></td>'+
+        '<span class="agent-name" onclick="showDrill(\''+esc+'\')">'+ agent+'</span></div></td>'+
         '<td style="text-align:center"><span class="int-badge" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+agentCount[agent]+'</span></td>'+
+        '<td><div class="tort-badges">'+tortBadges+'</div></td>'+
         '</tr>';
     }).join('');
   }
@@ -817,7 +834,34 @@ function showTortPopup(e, agent, tortType){
   popup.classList.add('show');
 }
 
-function hideTortPopup(){document.getElementById('tort-popup').classList.remove('show');}
+// Historic tort popup — shows range total only (no WTD/MTD available)
+function showTortPopupHist(e, agent, tortType, rangeTotal){
+  e.stopPropagation();
+  var colorMap={SSD:'#1d4ed8',SSI:'#6d28d9',ISA:'#047857',TTW:'#b45309'};
+  document.getElementById('tort-popup-title').innerHTML=
+    '<span style="color:'+colorMap[tortType]+'">'+tortType+'</span> — '+agent;
+  document.getElementById('tp-today').textContent=rangeTotal;
+  document.getElementById('tp-wtd').textContent='—';
+  document.getElementById('tp-mtd').textContent='—';
+  // relabel for historic context
+  var popup=document.getElementById('tort-popup');
+  popup.querySelector('.tort-popup-row:first-of-type .lbl').textContent='In range';
+  var rect=e.target.getBoundingClientRect();
+  var top=rect.bottom+8, left=rect.left;
+  if(left+220>window.innerWidth) left=window.innerWidth-228;
+  if(top+130>window.innerHeight) top=rect.top-138;
+  popup.style.top=top+'px';
+  popup.style.left=left+'px';
+  popup.classList.add('show');
+}
+
+function hideTortPopup(){
+  document.getElementById('tort-popup').classList.remove('show');
+  // restore live label
+  var popup=document.getElementById('tort-popup');
+  var firstLbl=popup.querySelector('.tort-popup-row:first-of-type .lbl');
+  if(firstLbl) firstLbl.textContent='Today';
+}
 document.addEventListener('click', hideTortPopup);
 
 // ─── LAW FIRM TILES ────────────────────────────────────────────────────────
