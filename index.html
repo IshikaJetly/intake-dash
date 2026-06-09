@@ -124,6 +124,23 @@ tbody td{padding:14px 20px;vertical-align:middle;font-size:19px}
 .drill-firm{font-family:var(--font-head);font-weight:700;color:#0f172a}
 .drill-count{font-family:var(--font-head);font-weight:800;font-size:20px}
 
+/* TORT BADGES in leaderboard */
+.tort-badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:center}
+.tort-badge{display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:99px;font-size:14px;font-weight:800;font-family:var(--font-head);border:2px solid;cursor:pointer;transition:transform .12s,box-shadow .12s;position:relative;white-space:nowrap}
+.tort-badge:hover{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,0.12)}
+.tort-badge .tb-label{font-size:11px;font-weight:700;opacity:.7;margin-right:2px;letter-spacing:.04em}
+.tb-ssd{background:#eff6ff;color:#1d4ed8;border-color:#93c5fd}
+.tb-ssi{background:#f5f3ff;color:#6d28d9;border-color:#c4b5fd}
+.tb-isa{background:#ecfdf5;color:#047857;border-color:#6ee7b7}
+.tb-ttw{background:#fffbeb;color:#b45309;border-color:#fcd34d}
+/* TORT POPUP */
+#tort-popup{position:fixed;z-index:900;background:#fff;border:2px solid #dbeafe;border-radius:14px;padding:16px 20px;box-shadow:0 12px 40px rgba(30,64,175,0.18);min-width:200px;display:none;pointer-events:none}
+#tort-popup.show{display:block}
+.tort-popup-title{font-family:var(--font-head);font-size:16px;font-weight:800;color:#1e3a8a;margin-bottom:10px;border-bottom:1px solid #eff6ff;padding-bottom:8px}
+.tort-popup-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:15px}
+.tort-popup-row .lbl{color:#64748b;font-weight:600}
+.tort-popup-row .val{font-family:var(--font-head);font-weight:800;font-size:17px}
+
 /* CHART TAB */
 .chart-controls{background:#fff;border:2px solid #dbeafe;border-radius:14px;padding:16px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
 .chart-controls label{font-size:16px;font-weight:700;color:#1e3a8a}
@@ -315,6 +332,14 @@ footer{display:flex;justify-content:space-between;padding:4px 6px}
   </div>
 </div>
 
+<!-- TORT POPUP -->
+<div id="tort-popup">
+  <div class="tort-popup-title" id="tort-popup-title"></div>
+  <div class="tort-popup-row"><span class="lbl">Today</span><span class="val" id="tp-today">—</span></div>
+  <div class="tort-popup-row"><span class="lbl">WTD</span><span class="val" id="tp-wtd">—</span></div>
+  <div class="tort-popup-row"><span class="lbl">MTD</span><span class="val" id="tp-mtd">—</span></div>
+</div>
+
 <!-- CELEBRATION OVERLAY -->
 <div id="cel-overlay">
   <div id="cel-card">
@@ -363,7 +388,7 @@ var campColorMap={},campColorIdx=0;
 var knownRows=null,celQueue=[],celActive=false,celTimer=null,cdItv=null;
 var soundEnabled=false,actx=null;
 var currentMode='live';
-var liveSnapshot={rows:[],agentTotals:{},firmTotals:{},tortTotals:{}};
+var liveSnapshot={rows:[],agentTotals:{},firmTotals:{},tortTotals:{},agentTortTotals:{}};
 var histSnapshot={rows:[]};
 var chartInstance=null;
 
@@ -674,7 +699,7 @@ function render(data){
   var agentTotals=data.agentTotals||{};
   var firmTotals=data.firmTotals||{};
   var tortTotals=data.tortTotals||{};
-  liveSnapshot={rows:rows,agentTotals:agentTotals,firmTotals:firmTotals,tortTotals:tortTotals};
+  liveSnapshot={rows:rows,agentTotals:agentTotals,firmTotals:firmTotals,tortTotals:tortTotals,agentTortTotals:data.agentTortTotals||{}};
 
   // Celebration detection
   if(knownRows!==null&&rows.length>knownRows.length){
@@ -694,11 +719,18 @@ function render(data){
 }
 
 // ─── LEADERBOARD ───────────────────────────────────────────────────────────
-function renderLeaderboard(rows,agentTotals){
-  var todayCount={},lastCamp={};
-  rows.forEach(function(r){todayCount[r.agent]=(todayCount[r.agent]||0)+1;lastCamp[r.agent]=r.campaign;});
+function renderLeaderboard(rows, agentTotals){
+  var todayCount={}, lastCamp={}, todayTort={};
+  rows.forEach(function(r){
+    todayCount[r.agent]=(todayCount[r.agent]||0)+1;
+    lastCamp[r.agent]=r.campaign;
+    // per-agent tort today
+    if(!todayTort[r.agent])todayTort[r.agent]={SSD:0,SSI:0,ISA:0,TTW:0};
+    var t=String(r.tort||'').trim().toUpperCase();
+    if(todayTort[r.agent][t]!==undefined)todayTort[r.agent][t]++;
+  });
   var agents=Object.keys(todayCount).sort(function(a,b){return todayCount[b]-todayCount[a];});
-  var total=rows.length,top=agents[0];
+  var total=rows.length, top=agents[0];
   document.getElementById('s1-val').textContent=total;
   document.getElementById('s1-sub').textContent=agents.length+' agent'+(agents.length!==1?'s':'')+' active';
   document.getElementById('s2-val').textContent=top?top.split(' ')[0]:'—';
@@ -708,26 +740,85 @@ function renderLeaderboard(rows,agentTotals){
   document.getElementById('tbl-title').textContent='Live leaderboard';
   document.getElementById('tbl-sub').textContent=total+' intake'+(total!==1?'s':'')+' recorded today';
   document.getElementById('table-head').innerHTML=
-    '<tr><th style="width:60px;text-align:center">#</th><th>Agent</th>'+
-    '<th class="tc" style="width:100px">Today</th><th class="tc" style="width:100px">WTD</th><th class="tc" style="width:100px">MTD</th>'+
-    '<th style="width:170px">Campaign</th></tr>';
-  if(!agents.length){document.getElementById('table-body').innerHTML='<tr><td colspan="6"><div class="empty">No intakes yet</div></td></tr>';return;}
+    '<tr>'+
+    '<th style="width:54px;text-align:center">#</th>'+
+    '<th>Agent</th>'+
+    '<th class="tc" style="width:88px">Today</th>'+
+    '<th class="tc" style="width:88px">WTD</th>'+
+    '<th class="tc" style="width:88px">MTD</th>'+
+    '<th class="tc" style="width:290px">SSD · SSI · ISA · TTW</th>'+
+    '<th style="width:150px">Campaign</th>'+
+    '</tr>';
+  if(!agents.length){document.getElementById('table-body').innerHTML='<tr><td colspan="7"><div class="empty">No intakes yet</div></td></tr>';return;}
   var wtdC={bg:"#f5f3ff",color:"#6d28d9",border:"#c4b5fd"};
   var mtdC={bg:"#ecfdf5",color:"#047857",border:"#6ee7b7"};
   document.getElementById('table-body').innerHTML=agents.map(function(agent,i){
     var c=getAgentColor(agent);
-    var camp=lastCamp[agent]||'—';var cc=getCampColor(camp);
+    var camp=lastCamp[agent]||'—'; var cc=getCampColor(camp);
     var t=agentTotals[agent]||{wtd:0,mtd:0};
-    return'<tr><td class="rank-cell">'+rankIcon(i)+'</td>'+
+    var at=agentTotals[agent]||{ssd_wtd:0,ssd_mtd:0,ssi_wtd:0,ssi_mtd:0,isa_wtd:0,isa_mtd:0,ttw_wtd:0,ttw_mtd:0};
+    var td=todayTort[agent]||{SSD:0,SSI:0,ISA:0,TTW:0};
+    var esc=agent.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    // build tort badges — only show if count > 0 today, always show all 4
+    var tortBadges=
+      '<span class="tort-badge tb-ssd" onclick="showTortPopup(event,\''+esc+'\',\'SSD\')"><span class="tb-label">SSD</span>'+td.SSD+'</span>'+
+      '<span class="tort-badge tb-ssi" onclick="showTortPopup(event,\''+esc+'\',\'SSI\')"><span class="tb-label">SSI</span>'+td.SSI+'</span>'+
+      '<span class="tort-badge tb-isa" onclick="showTortPopup(event,\''+esc+'\',\'ISA\')"><span class="tb-label">ISA</span>'+td.ISA+'</span>'+
+      '<span class="tort-badge tb-ttw" onclick="showTortPopup(event,\''+esc+'\',\'TTW\')"><span class="tb-label">TTW</span>'+td.TTW+'</span>';
+    return'<tr>'+
+      '<td class="rank-cell">'+rankIcon(i)+'</td>'+
       '<td style="white-space:nowrap"><div class="agent-row"><div class="av" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+initials(agent)+'</div>'+
-      '<span class="agent-name" onclick="showDrill(\''+agent.replace(/'/g,"\\'")+'\')">' +agent+'</span></div></td>'+
-      '<td style="text-align:center;width:100px"><span class="int-badge" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+todayCount[agent]+'</span></td>'+
-      '<td style="text-align:center;width:100px"><span class="int-badge" style="background:'+wtdC.bg+';color:'+wtdC.color+';border-color:'+wtdC.border+'">'+t.wtd+'</span></td>'+
-      '<td style="text-align:center;width:100px"><span class="int-badge" style="background:'+mtdC.bg+';color:'+mtdC.color+';border-color:'+mtdC.border+'">'+t.mtd+'</span></td>'+
+      '<span class="agent-name" onclick="showDrill(\''+esc+'\')">' +agent+'</span></div></td>'+
+      '<td style="text-align:center"><span class="int-badge" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+todayCount[agent]+'</span></td>'+
+      '<td style="text-align:center"><span class="int-badge" style="background:'+wtdC.bg+';color:'+wtdC.color+';border-color:'+wtdC.border+'">'+t.wtd+'</span></td>'+
+      '<td style="text-align:center"><span class="int-badge" style="background:'+mtdC.bg+';color:'+mtdC.color+';border-color:'+mtdC.border+'">'+t.mtd+'</span></td>'+
+      '<td><div class="tort-badges">'+tortBadges+'</div></td>'+
       '<td><span class="camp-tag" style="background:'+cc.bg+';color:'+cc.color+';border-color:'+cc.border+'">'+camp+'</span></td>'+
       '</tr>';
   }).join('');
 }
+
+// ─── TORT POPUP ────────────────────────────────────────────────────────────
+function showTortPopup(e, agent, tortType){
+  e.stopPropagation();
+  var rows=currentMode==='live'?liveSnapshot.rows:histSnapshot.rows;
+  var agentTotals=liveSnapshot.agentTotals||{};
+
+  // Today count for this specific tort
+  var todayCount=0;
+  rows.forEach(function(r){
+    if(r.agent===agent && String(r.tort||'').trim().toUpperCase()===tortType) todayCount++;
+  });
+
+  // WTD/MTD: we need per-agent per-tort from Apps Script
+  // They live in agentTotals[agent].tort_wtd / tort_mtd if we add them
+  // For now derive from snapshot rows using the agentTortTotals we store
+  var snap=liveSnapshot.agentTortTotals||{};
+  var key=agent+'|'+tortType;
+  var wtd=(snap[key]&&snap[key].wtd!=null)?snap[key].wtd:'—';
+  var mtd=(snap[key]&&snap[key].mtd!=null)?snap[key].mtd:'—';
+
+  var colorMap={SSD:'#1d4ed8',SSI:'#6d28d9',ISA:'#047857',TTW:'#b45309'};
+  document.getElementById('tort-popup-title').innerHTML=
+    '<span style="color:'+colorMap[tortType]+'">'+tortType+'</span> — '+agent;
+  document.getElementById('tp-today').textContent=todayCount;
+  document.getElementById('tp-wtd').textContent=wtd;
+  document.getElementById('tp-mtd').textContent=mtd;
+
+  var popup=document.getElementById('tort-popup');
+  var rect=e.target.getBoundingClientRect();
+  var top=rect.bottom+8;
+  var left=rect.left;
+  // keep within viewport
+  if(left+220>window.innerWidth) left=window.innerWidth-228;
+  if(top+130>window.innerHeight) top=rect.top-138;
+  popup.style.top=top+'px';
+  popup.style.left=left+'px';
+  popup.classList.add('show');
+}
+
+function hideTortPopup(){document.getElementById('tort-popup').classList.remove('show');}
+document.addEventListener('click', hideTortPopup);
 
 // ─── LAW FIRM TILES ────────────────────────────────────────────────────────
 function renderFirms(firmTotals,liveRows){
