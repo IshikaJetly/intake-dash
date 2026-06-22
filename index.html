@@ -148,6 +148,55 @@ tbody td{padding:14px 20px;vertical-align:middle;font-size:19px}
 .chart-select:focus{border-color:#3b82f6}
 .chart-wrap{background:#fff;border:2px solid #dbeafe;border-radius:18px;padding:28px;position:relative;min-height:400px}
 
+/* AGENT BREAKDOWN ACCORDION */
+.ab-card{background:#fff;border:2px solid #dbeafe;border-radius:18px;overflow:hidden;transition:box-shadow .18s;margin-bottom:10px}
+.ab-card:hover{box-shadow:0 6px 24px rgba(30,64,175,0.09)}
+.ab-header{display:flex;align-items:center;gap:16px;padding:18px 24px;cursor:pointer;user-select:none;position:relative}
+.ab-left-bar{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:18px 0 0 0}
+.ab-card.open>.ab-header>.ab-left-bar{border-radius:18px 0 0 0}
+.ab-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;font-family:var(--font-head);border:3px solid}
+.ab-info{flex:1;min-width:0}
+.ab-name{font-family:var(--font-head);font-size:20px;font-weight:800;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ab-meta{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap}
+.ab-camp{font-size:13px;font-weight:700;border-radius:8px;padding:3px 10px;border:2px solid;display:inline-block}
+.ab-rank{font-size:20px;flex-shrink:0}
+.ab-totals{display:flex;gap:4px;align-items:stretch;flex-shrink:0}
+.ab-tot{text-align:center;padding:8px 14px;border-radius:12px;min-width:68px}
+.ab-tot-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+.ab-tot-val{font-family:var(--font-head);font-size:26px;font-weight:800;line-height:1}
+.ab-tot-today{background:#eff6ff}.ab-tot-today .ab-tot-label{color:#3b82f6}.ab-tot-today .ab-tot-val{color:#1d4ed8}
+.ab-tot-wtd{background:#f5f3ff}.ab-tot-wtd .ab-tot-label{color:#8b5cf6}.ab-tot-wtd .ab-tot-val{color:#6d28d9}
+.ab-tot-mtd{background:#ecfdf5}.ab-tot-mtd .ab-tot-label{color:#10b981}.ab-tot-mtd .ab-tot-val{color:#047857}
+.ab-chevron{font-size:20px;color:#94a3b8;transition:transform .25s cubic-bezier(.4,0,.2,1);flex-shrink:0;margin-left:8px}
+.ab-card.open .ab-chevron{transform:rotate(180deg)}
+/* Drilldown body */
+.ab-body{display:none;border-top:2px solid #eff6ff}
+.ab-card.open .ab-body{display:block}
+.ab-dtabs{display:flex;background:#f8faff;border-bottom:2px solid #eff6ff}
+.ab-dtab{flex:1;text-align:center;padding:11px 8px;font-size:14px;font-weight:700;font-family:var(--font-head);color:#64748b;cursor:pointer;letter-spacing:.02em;border-bottom:3px solid transparent;transition:all .15s}
+.ab-dtab:hover{color:#1d4ed8;background:#eff6ff}
+.ab-dtab.active{color:#1d4ed8;border-bottom:3px solid #1e40af;background:#fff}
+.ab-dcontent{padding:20px 24px}
+/* Drilldown table */
+.ab-table{width:100%;border-collapse:collapse;table-layout:fixed}
+.ab-table th{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;padding:0 10px 10px;text-align:right}
+.ab-table th:first-child{text-align:left;padding-left:0}
+.ab-table td{padding:9px 10px;border-top:1px solid #f0f4ff;font-size:16px;text-align:right;vertical-align:middle}
+.ab-table td:first-child{text-align:left;padding-left:0;font-family:var(--font-head);font-weight:700;font-size:15px;color:#0f172a}
+.ab-table tr:first-child td{border-top:none}
+.ab-table tr:hover td{background:#f8faff}
+.ab-td-today{color:#1d4ed8;font-weight:700;font-family:var(--font-head)}
+.ab-td-wtd{color:#6d28d9;font-weight:700;font-family:var(--font-head)}
+.ab-td-mtd{color:#047857;font-weight:700;font-family:var(--font-head)}
+/* tort dot */
+.tort-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;vertical-align:middle;flex-shrink:0}
+/* bar in firm tab */
+.ab-bar-wrap{display:flex;align-items:center;gap:8px}
+.ab-bar-bg{flex:1;height:6px;background:#f0f4ff;border-radius:99px;overflow:hidden;min-width:40px}
+.ab-bar-fill{height:100%;border-radius:99px;transition:width .4s ease}
+/* historic note */
+.ab-hist-note{font-size:13px;color:#b45309;background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:6px 14px;margin-bottom:14px;font-weight:600}
+
 /* FOOTER */
 footer{display:flex;justify-content:space-between;padding:4px 6px}
 .foot{font-size:14px;color:#94a3b8;font-weight:500}
@@ -223,6 +272,7 @@ footer{display:flex;justify-content:space-between;padding:4px 6px}
     <button class="tab-btn active" onclick="switchTab('leaderboard',this)">🏆 Agent Leaderboard</button>
     <button class="tab-btn" onclick="switchTab('firms',this)">🏢 Law Firm Breakdown</button>
     <button class="tab-btn" onclick="switchTab('tort',this)">📊 Product Breakdown</button>
+    <button class="tab-btn" onclick="switchTab('agents',this)">👤 Agent Breakdown</button>
     <button class="tab-btn" onclick="switchTab('chart',this)">📈 Firm vs Agent Chart</button>
   </div>
 
@@ -299,6 +349,15 @@ footer{display:flex;justify-content:space-between;padding:4px 6px}
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- TAB 5: AGENT BREAKDOWN (accordion) -->
+  <div id="tab-agents" class="tab-panel">
+    <div class="tbl-top" style="background:#eff6ff;border-radius:14px;margin-bottom:14px">
+      <div class="tbl-title" id="agent-tile-title">Agent Breakdown</div>
+      <div class="tbl-sub" id="agent-tile-sub">Today · WTD · MTD per agent</div>
+    </div>
+    <div id="agent-tiles"></div>
   </div>
 
   <!-- TAB 4: FIRM vs AGENT CHART -->
@@ -438,6 +497,7 @@ function clearTables(){
   document.getElementById('table-body').innerHTML='<tr><td colspan="5"><div class="empty">Select a date range and click Show Data</div></td></tr>';
   document.getElementById('table-head').innerHTML='';
   document.getElementById('firm-tiles').innerHTML='<div class="empty">Select a date range and click Show Data</div>';
+  document.getElementById('agent-tiles').innerHTML='<div class="empty">Select a date range and click Show Data</div>';
   ['ssd','ssi','isa','ttw'].forEach(function(t){
     document.getElementById(t+'-today').textContent='—';
     document.getElementById(t+'-wtd').textContent='—';
@@ -561,6 +621,8 @@ function renderHistoric(data,from,to){
 
   // Update chart dropdown
   updateFirmSelect(firms);
+  // Agent breakdown tiles (historic)
+  renderAgentTiles(rows,null,true,label);
 }
 
 // ─── AGENT DRILLDOWN ───────────────────────────────────────────────────────
@@ -728,6 +790,7 @@ function render(data){
   renderLeaderboard(rows,agentTotals);
   renderFirms(firmTotals,rows);
   renderProducts(tortTotals,rows);
+  renderAgentTiles(rows,agentTotals,false,null,liveSnapshot.agentTortTotals);
   // Update chart firm list
   var firms=Object.keys(firmTotals);
   var todayFirms=[];rows.forEach(function(r){if(r.firm&&!todayFirms.includes(r.firm))todayFirms.push(r.firm);});
@@ -863,6 +926,152 @@ function hideTortPopup(){
   if(firstLbl) firstLbl.textContent='Today';
 }
 document.addEventListener('click', hideTortPopup);
+
+// ─── AGENT BREAKDOWN ACCORDION ────────────────────────────────────────────
+var abOpenState={};
+var TORT_DOTS={SSD:'#3b82f6',SSI:'#8b5cf6',ISA:'#10b981',TTW:'#f59e0b'};
+var RANK_ICONS=['🥇','🥈','🥉'];
+
+function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTotals){
+  var todayCount={}, lastCamp={}, todayTort={}, todayFirm={};
+  rows.forEach(function(r){
+    todayCount[r.agent]=(todayCount[r.agent]||0)+1;
+    lastCamp[r.agent]=r.campaign;
+    if(!todayTort[r.agent])todayTort[r.agent]={SSD:0,SSI:0,ISA:0,TTW:0};
+    var t=String(r.tort||'').trim().toUpperCase();
+    if(todayTort[r.agent][t]!==undefined)todayTort[r.agent][t]++;
+    if(!todayFirm[r.agent])todayFirm[r.agent]={};
+    if(r.firm)todayFirm[r.agent][r.firm]=(todayFirm[r.agent][r.firm]||0)+1;
+  });
+  var agents=Object.keys(todayCount).sort(function(a,b){return todayCount[b]-todayCount[a];});
+
+  var titleEl=document.getElementById('agent-tile-title');
+  var subEl=document.getElementById('agent-tile-sub');
+  if(isHistoric){
+    titleEl.textContent='Agent Breakdown';
+    subEl.textContent=(rangeLabel||'Historic range')+' · '+rows.length+' intake'+(rows.length!==1?'s':'');
+  } else {
+    titleEl.textContent='Agent Breakdown';
+    subEl.textContent='Today · WTD · MTD per agent';
+  }
+
+  var container=document.getElementById('agent-tiles');
+  if(!agents.length){
+    container.innerHTML='<div class="empty">No agent data yet</div>';
+    return;
+  }
+
+  container.innerHTML='';
+  agents.forEach(function(agent,i){
+    var c=getAgentColor(agent);
+    var camp=lastCamp[agent]||'';
+    var cc=camp?getCampColor(camp):{bg:'#f1f5f9',c:'#64748b',b:'#e2e8f0'};
+    var at=(!isHistoric&&agentTotals&&agentTotals[agent])||{wtd:'—',mtd:'—'};
+    var todayVal=todayCount[agent];
+    var wtdVal=isHistoric?'—':(at.wtd||0);
+    var mtdVal=isHistoric?'—':(at.mtd||0);
+    var rankIcon=i<3?RANK_ICONS[i]:'<span style="font-family:var(--font-head);font-size:16px;font-weight:800;color:#94a3b8">#'+(i+1)+'</span>';
+    var id='ab-'+i;
+
+    var card=document.createElement('div');
+    card.className='ab-card'+(abOpenState[agent]?' open':'');
+    card.id=id;
+
+    // Build tort rows
+    var tortRows=['SSD','SSI','ISA','TTW'].map(function(tort){
+      var dot=TORT_DOTS[tort];
+      var tv=todayTort[agent]?todayTort[agent][tort]||0:0;
+      var key=agent+'|'+tort;
+      var att=(!isHistoric&&agentTortTotals&&agentTortTotals[key])||null;
+      var wv=isHistoric?'—':(att!=null?att.wtd:'—');
+      var mv=isHistoric?'—':(att!=null?att.mtd:'—');
+      return'<tr>'+
+        '<td><span class="tort-dot" style="background:'+dot+'"></span>'+tort+'</td>'+
+        '<td class="ab-td-today">'+tv+'</td>'+
+        '<td class="ab-td-wtd">'+wv+'</td>'+
+        '<td class="ab-td-mtd">'+mv+'</td>'+
+      '</tr>';
+    }).join('');
+
+    // Build firm rows
+    var firms=Object.keys(todayFirm[agent]||{}).sort(function(a,b){return (todayFirm[agent][b]||0)-(todayFirm[agent][a]||0);});
+    var maxFirm=firms.length?Math.max.apply(null,firms.map(function(f){return todayFirm[agent][f];})):1;
+    var firmRows=firms.length?firms.map(function(firm){
+      var fv=todayFirm[agent][firm];
+      var pct=Math.round((fv/maxFirm)*100);
+      return'<tr>'+
+        '<td>'+firm+'</td>'+
+        '<td class="ab-td-today">'+
+          '<div class="ab-bar-wrap">'+
+            '<div class="ab-bar-bg"><div class="ab-bar-fill" style="width:'+pct+'%;background:'+c.color+'"></div></div>'+
+            '<span style="min-width:20px">'+fv+'</span>'+
+          '</div>'+
+        '</td>'+
+        '<td class="ab-td-wtd">—</td>'+
+        '<td class="ab-td-mtd">—</td>'+
+      '</tr>';
+    }).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;font-family:var(--font);font-size:14px;padding:16px 0">No firm data for today</td></tr>';
+
+    var tortTable='<table class="ab-table">'+
+      '<thead><tr><th style="width:90px">Tort</th><th style="width:70px">Today</th><th style="width:70px">WTD</th><th style="width:70px">MTD</th></tr></thead>'+
+      '<tbody>'+tortRows+'</tbody></table>';
+    var firmTable='<table class="ab-table">'+
+      '<thead><tr><th>Law firm</th><th style="width:140px">Today</th><th style="width:70px">WTD</th><th style="width:70px">MTD</th></tr></thead>'+
+      '<tbody>'+firmRows+'</tbody></table>';
+
+    var histNote=isHistoric?'<div class="ab-hist-note">WTD &amp; MTD not available in historic mode — showing today\'s range totals</div>':'';
+    var wtdMtdNote='';
+
+    card.innerHTML=
+      '<div class="ab-header" onclick="abToggle(\''+agent.replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\','+i+')">'+
+        '<div class="ab-left-bar" style="background:'+c.color+'"></div>'+
+        '<div class="av" style="background:'+c.bg+';color:'+c.color+';border-color:'+c.border+'">'+initials(agent)+'</div>'+
+        '<div class="ab-info">'+
+          '<div class="ab-name">'+agent+'</div>'+
+          '<div class="ab-meta">'+
+            '<span class="ab-rank">'+rankIcon+'</span>'+
+            (camp?'<span class="ab-camp" style="background:'+cc.bg+';color:'+cc.color+';border-color:'+cc.border+'">'+camp+'</span>':'')+
+          '</div>'+
+        '</div>'+
+        '<div class="ab-totals">'+
+          '<div class="ab-tot ab-tot-today"><div class="ab-tot-label">'+(isHistoric?'Total':'Today')+'</div><div class="ab-tot-val">'+todayVal+'</div></div>'+
+          '<div class="ab-tot ab-tot-wtd"><div class="ab-tot-label">WTD</div><div class="ab-tot-val">'+wtdVal+'</div></div>'+
+          '<div class="ab-tot ab-tot-mtd"><div class="ab-tot-label">MTD</div><div class="ab-tot-val">'+mtdVal+'</div></div>'+
+        '</div>'+
+        '<div class="ab-chevron">▾</div>'+
+      '</div>'+
+      '<div class="ab-body">'+
+        '<div class="ab-dtabs">'+
+          '<div class="ab-dtab active" id="abt-'+i+'-tort" onclick="abTab(event,'+i+',\'tort\')">📊 By tort</div>'+
+          '<div class="ab-dtab" id="abt-'+i+'-firm" onclick="abTab(event,'+i+',\'firm\')">🏢 By firm</div>'+
+        '</div>'+
+        '<div class="ab-dcontent" id="abd-'+i+'">'+histNote+wtdMtdNote+tortTable+'</div>'+
+      '</div>';
+
+    // stash tables for tab switching
+    card._tortTable=tortTable;
+    card._firmTable=firmTable;
+    card._histNote=histNote;
+    card._wtdMtdNote=wtdMtdNote;
+    container.appendChild(card);
+  });
+}
+
+function abToggle(agentName,idx){
+  var card=document.getElementById('ab-'+idx);
+  var isOpen=card.classList.contains('open');
+  card.classList.toggle('open',!isOpen);
+  abOpenState[agentName]=!isOpen;
+}
+
+function abTab(e,idx,tab){
+  e.stopPropagation();
+  var card=document.getElementById('ab-'+idx);
+  document.getElementById('abt-'+idx+'-tort').classList.toggle('active',tab==='tort');
+  document.getElementById('abt-'+idx+'-firm').classList.toggle('active',tab==='firm');
+  var body=document.getElementById('abd-'+idx);
+  body.innerHTML=(card._histNote||'')+(card._wtdMtdNote||'')+(tab==='tort'?card._tortTable:card._firmTable);
+}
 
 // ─── LAW FIRM TILES ────────────────────────────────────────────────────────
 function renderFirms(firmTotals,liveRows){
