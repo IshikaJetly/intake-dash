@@ -930,6 +930,7 @@ document.addEventListener('click', hideTortPopup);
 
 // ─── AGENT BREAKDOWN ACCORDION ────────────────────────────────────────────
 var abOpenState={};
+var abTabState={};
 var TORT_DOTS={SSD:'#3b82f6',SSI:'#8b5cf6',ISA:'#10b981',TTW:'#f59e0b'};
 var RANK_ICONS=['🥇','🥈','🥉'];
 
@@ -1014,17 +1015,27 @@ function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTo
       '</tr>';
     }).join('');
 
-    // Build firm rows
-    var firms=Object.keys(todayFirm[agent]||{}).sort(function(a,b){return (todayFirm[agent][b]||0)-(todayFirm[agent][a]||0);});
-    var maxFirm=firms.length?Math.max.apply(null,firms.map(function(f){return todayFirm[agent][f];})):1;
-    var firmTotalsMap=(!isHistoric&&agentTotals&&agentTotals._firmTotals)||{};
-    var firmRows=firms.length?firms.map(function(firm){
-      var fv=todayFirm[agent][firm];
-      var pct=Math.round((fv/maxFirm)*100);
+    // Build firm rows — from agentFirmTotals so ALL firms (MTD/WTD) show, not just today's
+    var agentFirmMap=(!isHistoric&&agentTotals&&agentTotals._agentFirmTotals)||{};
+    // collect all firms this agent has touched (today + WTD/MTD)
+    var firmSet={};
+    Object.keys(todayFirm[agent]||{}).forEach(function(f){firmSet[f]=true;});
+    Object.keys(agentFirmMap).forEach(function(key){
+      if(key.indexOf(agent+'|')===0){var f=key.slice((agent+'|').length);firmSet[f]=true;}
+    });
+    var allFirmsForAgent=Object.keys(firmSet).sort(function(a,b){
+      var ma=(agentFirmMap[agent+'|'+a]||{}).mtd||0;
+      var mb=(agentFirmMap[agent+'|'+b]||{}).mtd||0;
+      return mb-ma;
+    });
+    var maxFirmToday=allFirmsForAgent.length?Math.max.apply(null,allFirmsForAgent.map(function(f){return todayFirm[agent]&&todayFirm[agent][f]||0;})):1;
+    var firmRows=allFirmsForAgent.length?allFirmsForAgent.map(function(firm){
+      var fv=(todayFirm[agent]&&todayFirm[agent][firm])||0;
+      var pct=maxFirmToday>0?Math.round((fv/maxFirmToday)*100):0;
       var key=agent+'|'+firm;
-      var aft=(!isHistoric&&agentTotals&&agentTotals._agentFirmTotals&&agentTotals._agentFirmTotals[key])||null;
-      var wv=isHistoric?'—':(aft!=null?aft.wtd:'—');
-      var mv=isHistoric?'—':(aft!=null?aft.mtd:'—');
+      var aft=agentFirmMap[key]||null;
+      var wv=isHistoric?'—':(aft!=null?aft.wtd:0);
+      var mv=isHistoric?'—':(aft!=null?aft.mtd:0);
       return'<tr>'+
         '<td>'+firm+'</td>'+
         '<td class="ab-td-today">'+
@@ -1036,20 +1047,31 @@ function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTo
         '<td class="ab-td-wtd">'+wv+'</td>'+
         '<td class="ab-td-mtd">'+mv+'</td>'+
       '</tr>';
-        '<td class="ab-td-mtd">—</td>'+
-      '</tr>';
-    }).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;font-family:var(--font);font-size:14px;padding:16px 0">No firm data for today</td></tr>';
+    }).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;font-family:var(--font);font-size:14px;padding:16px 0">No firm data available</td></tr>';
 
     var tortTable='<table class="ab-table">'+
       '<thead><tr><th style="width:90px">Tort</th><th style="width:70px">Today</th><th style="width:70px">WTD</th><th style="width:70px">MTD</th></tr></thead>'+
       '<tbody>'+tortRows+'</tbody></table>';
+
+    // Firm table total row
+    var firmTotalToday=todayVal;
+    var firmTotalWtd=isHistoric?'—':((agentTotals[agent]&&agentTotals[agent].wtd)||0);
+    var firmTotalMtd=isHistoric?'—':((agentTotals[agent]&&agentTotals[agent].mtd)||0);
+    var firmTotalRow=allFirmsForAgent.length?
+      '<tr style="background:#f8faff;border-top:2px solid #dbeafe">'+
+        '<td style="font-family:var(--font-head);font-weight:800;color:#0f172a">Total</td>'+
+        '<td class="ab-td-today"><div class="ab-bar-wrap"><span style="min-width:20px">'+firmTotalToday+'</span></div></td>'+
+        '<td class="ab-td-wtd">'+firmTotalWtd+'</td>'+
+        '<td class="ab-td-mtd">'+firmTotalMtd+'</td>'+
+      '</tr>':'';
     var firmTable='<table class="ab-table">'+
       '<thead><tr><th>Law firm</th><th style="width:140px">Today</th><th style="width:70px">WTD</th><th style="width:70px">MTD</th></tr></thead>'+
-      '<tbody>'+firmRows+'</tbody></table>';
+      '<tbody>'+firmRows+firmTotalRow+'</tbody></table>';
 
     var histNote=isHistoric?'<div class="ab-hist-note">WTD &amp; MTD not available in historic mode — showing today\'s range totals</div>':'';
     var wtdMtdNote='';
 
+    var savedTab=abTabState[agent]||'tort';
     card.innerHTML=
       '<div class="ab-header" onclick="abToggle(\''+agent.replace(/'/g,"\\'").replace(/"/g,'&quot;')+'\','+i+')">'+
         '<div class="ab-left-bar" style="background:'+c.color+'"></div>'+
@@ -1070,17 +1092,17 @@ function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTo
       '</div>'+
       '<div class="ab-body">'+
         '<div class="ab-dtabs">'+
-          '<div class="ab-dtab active" id="abt-'+i+'-tort" onclick="abTab(event,'+i+',\'tort\')">📊 By tort</div>'+
-          '<div class="ab-dtab" id="abt-'+i+'-firm" onclick="abTab(event,'+i+',\'firm\')">🏢 By firm</div>'+
+          '<div class="ab-dtab'+(savedTab==='tort'?' active':'')+'" id="abt-'+i+'-tort" onclick="abTab(event,'+i+',\'tort\')">📊 By tort</div>'+
+          '<div class="ab-dtab'+(savedTab==='firm'?' active':'')+'" id="abt-'+i+'-firm" onclick="abTab(event,'+i+',\'firm\')">🏢 By firm</div>'+
         '</div>'+
-        '<div class="ab-dcontent" id="abd-'+i+'">'+histNote+wtdMtdNote+tortTable+'</div>'+
+        '<div class="ab-dcontent" id="abd-'+i+'">'+(histNote)+(savedTab==='tort'?tortTable:firmTable)+'</div>'+
       '</div>';
 
     // stash tables for tab switching
     card._tortTable=tortTable;
     card._firmTable=firmTable;
     card._histNote=histNote;
-    card._wtdMtdNote=wtdMtdNote;
+    card._agentName=agent;
     container.appendChild(card);
   });
 }
@@ -1090,6 +1112,7 @@ function abToggle(agentName,idx){
   var isOpen=card.classList.contains('open');
   card.classList.toggle('open',!isOpen);
   abOpenState[agentName]=!isOpen;
+  card._agentName=agentName;
 }
 
 function abTab(e,idx,tab){
@@ -1098,7 +1121,8 @@ function abTab(e,idx,tab){
   document.getElementById('abt-'+idx+'-tort').classList.toggle('active',tab==='tort');
   document.getElementById('abt-'+idx+'-firm').classList.toggle('active',tab==='firm');
   var body=document.getElementById('abd-'+idx);
-  body.innerHTML=(card._histNote||'')+(card._wtdMtdNote||'')+(tab==='tort'?card._tortTable:card._firmTable);
+  body.innerHTML=(card._histNote||'')+(tab==='tort'?card._tortTable:card._firmTable);
+  if(card._agentName) abTabState[card._agentName]=tab;
 }
 
 // ─── LAW FIRM TILES ────────────────────────────────────────────────────────
