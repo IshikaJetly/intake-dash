@@ -1060,7 +1060,7 @@ function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTo
     var firmTotalRow=allFirmsForAgent.length?
       '<tr style="background:#f8faff;border-top:2px solid #dbeafe">'+
         '<td style="font-family:var(--font-head);font-weight:800;color:#0f172a">Total</td>'+
-        '<td class="ab-td-today"><div class="ab-bar-wrap"><span style="min-width:20px">'+firmTotalToday+'</span></div></td>'+
+        '<td class="ab-td-today"><div class="ab-bar-wrap"><div class="ab-bar-bg"></div><span style="min-width:20px">'+firmTotalToday+'</span></div></td>'+
         '<td class="ab-td-wtd">'+firmTotalWtd+'</td>'+
         '<td class="ab-td-mtd">'+firmTotalMtd+'</td>'+
       '</tr>':'';
