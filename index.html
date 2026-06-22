@@ -778,7 +778,7 @@ function render(data){
   var agentTotals=data.agentTotals||{};
   var firmTotals=data.firmTotals||{};
   var tortTotals=data.tortTotals||{};
-  liveSnapshot={rows:rows,agentTotals:agentTotals,firmTotals:firmTotals,tortTotals:tortTotals,agentTortTotals:data.agentTortTotals||{}};
+  liveSnapshot={rows:rows,agentTotals:agentTotals,firmTotals:firmTotals,tortTotals:tortTotals,agentTortTotals:data.agentTortTotals||{},agentFirmTotals:data.agentFirmTotals||{},agentRoster:data.agentRoster||[]};
 
   // Celebration detection
   if(knownRows!==null&&rows.length>knownRows.length){
@@ -790,7 +790,8 @@ function render(data){
   renderLeaderboard(rows,agentTotals);
   renderFirms(firmTotals,rows);
   renderProducts(tortTotals,rows);
-  renderAgentTiles(rows,agentTotals,false,null,liveSnapshot.agentTortTotals);
+  var agentTotalsWithFirms=Object.assign({},agentTotals,{_firmTotals:liveSnapshot.firmTotals||{},_agentFirmTotals:liveSnapshot.agentFirmTotals||{}});
+  renderAgentTiles(rows,agentTotalsWithFirms,false,null,liveSnapshot.agentTortTotals,liveSnapshot.agentRoster);
   // Update chart firm list
   var firms=Object.keys(firmTotals);
   var todayFirms=[];rows.forEach(function(r){if(r.firm&&!todayFirms.includes(r.firm))todayFirms.push(r.firm);});
@@ -932,7 +933,7 @@ var abOpenState={};
 var TORT_DOTS={SSD:'#3b82f6',SSI:'#8b5cf6',ISA:'#10b981',TTW:'#f59e0b'};
 var RANK_ICONS=['🥇','🥈','🥉'];
 
-function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTotals){
+function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTotals, agentRoster){
   var todayCount={}, lastCamp={}, todayTort={}, todayFirm={};
   rows.forEach(function(r){
     todayCount[r.agent]=(todayCount[r.agent]||0)+1;
@@ -943,7 +944,23 @@ function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTo
     if(!todayFirm[r.agent])todayFirm[r.agent]={};
     if(r.firm)todayFirm[r.agent][r.firm]=(todayFirm[r.agent][r.firm]||0)+1;
   });
-  var agents=Object.keys(todayCount).sort(function(a,b){return todayCount[b]-todayCount[a];});
+
+  // Build full agent list: roster first (preserves order), then add any from today not in roster
+  var allAgents=[];
+  if(!isHistoric && agentRoster && agentRoster.length){
+    agentRoster.forEach(function(name){if(allAgents.indexOf(name)===-1)allAgents.push(name);});
+    Object.keys(todayCount).forEach(function(name){if(allAgents.indexOf(name)===-1)allAgents.push(name);});
+  } else {
+    // historic or no roster — use only agents who appear in rows
+    Object.keys(todayCount).forEach(function(name){allAgents.push(name);});
+  }
+
+  // Sort: agents with today intakes first (desc), then 0s alphabetically
+  allAgents.sort(function(a,b){
+    var ta=todayCount[a]||0, tb=todayCount[b]||0;
+    if(tb!==ta) return tb-ta;
+    return a.localeCompare(b);
+  });
 
   var titleEl=document.getElementById('agent-tile-title');
   var subEl=document.getElementById('agent-tile-sub');
@@ -956,21 +973,25 @@ function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTo
   }
 
   var container=document.getElementById('agent-tiles');
-  if(!agents.length){
+  if(!allAgents.length){
     container.innerHTML='<div class="empty">No agent data yet</div>';
     return;
   }
 
+  // Rank only counts agents with today > 0
+  var rankedAgents=allAgents.filter(function(a){return (todayCount[a]||0)>0;});
+
   container.innerHTML='';
-  agents.forEach(function(agent,i){
+  allAgents.forEach(function(agent,i){
     var c=getAgentColor(agent);
     var camp=lastCamp[agent]||'';
     var cc=camp?getCampColor(camp):{bg:'#f1f5f9',c:'#64748b',b:'#e2e8f0'};
     var at=(!isHistoric&&agentTotals&&agentTotals[agent])||{wtd:'—',mtd:'—'};
-    var todayVal=todayCount[agent];
-    var wtdVal=isHistoric?'—':(at.wtd||0);
-    var mtdVal=isHistoric?'—':(at.mtd||0);
-    var rankIcon=i<3?RANK_ICONS[i]:'<span style="font-family:var(--font-head);font-size:16px;font-weight:800;color:#94a3b8">#'+(i+1)+'</span>';
+    var todayVal=todayCount[agent]||0;
+    var wtdVal=isHistoric?'—':((agentTotals[agent]&&agentTotals[agent].wtd)||0);
+    var mtdVal=isHistoric?'—':((agentTotals[agent]&&agentTotals[agent].mtd)||0);
+    var rIdx=rankedAgents.indexOf(agent);
+    var rankIcon=todayVal===0?'<span style="font-family:var(--font-head);font-size:14px;font-weight:800;color:#cbd5e1">—</span>':(rIdx<3?RANK_ICONS[rIdx]:'<span style="font-family:var(--font-head);font-size:16px;font-weight:800;color:#94a3b8">#'+(rIdx+1)+'</span>');
     var id='ab-'+i;
 
     var card=document.createElement('div');
@@ -996,9 +1017,14 @@ function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTo
     // Build firm rows
     var firms=Object.keys(todayFirm[agent]||{}).sort(function(a,b){return (todayFirm[agent][b]||0)-(todayFirm[agent][a]||0);});
     var maxFirm=firms.length?Math.max.apply(null,firms.map(function(f){return todayFirm[agent][f];})):1;
+    var firmTotalsMap=(!isHistoric&&agentTotals&&agentTotals._firmTotals)||{};
     var firmRows=firms.length?firms.map(function(firm){
       var fv=todayFirm[agent][firm];
       var pct=Math.round((fv/maxFirm)*100);
+      var key=agent+'|'+firm;
+      var aft=(!isHistoric&&agentTotals&&agentTotals._agentFirmTotals&&agentTotals._agentFirmTotals[key])||null;
+      var wv=isHistoric?'—':(aft!=null?aft.wtd:'—');
+      var mv=isHistoric?'—':(aft!=null?aft.mtd:'—');
       return'<tr>'+
         '<td>'+firm+'</td>'+
         '<td class="ab-td-today">'+
@@ -1007,7 +1033,9 @@ function renderAgentTiles(rows, agentTotals, isHistoric, rangeLabel, agentTortTo
             '<span style="min-width:20px">'+fv+'</span>'+
           '</div>'+
         '</td>'+
-        '<td class="ab-td-wtd">—</td>'+
+        '<td class="ab-td-wtd">'+wv+'</td>'+
+        '<td class="ab-td-mtd">'+mv+'</td>'+
+      '</tr>';
         '<td class="ab-td-mtd">—</td>'+
       '</tr>';
     }).join(''):'<tr><td colspan="4" style="text-align:center;color:#94a3b8;font-family:var(--font);font-size:14px;padding:16px 0">No firm data for today</td></tr>';
